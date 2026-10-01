@@ -1,0 +1,13 @@
+.env
+.env.local
+.env.*.local
+node_modules/
+data/career-ops.db
+data/career-ops.db-*
+output/
+batch/
+web/.next/
+.DS_Store
+*.tsbuildinfo
+data/contacts.tsv
+data/Connections.csv

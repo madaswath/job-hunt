@@ -1,0 +1,103 @@
+{
+  "plugins": [
+    {
+      "id": "linkedin",
+      "name": "LinkedIn Connector",
+      "category": "Job Platforms",
+      "icon": "linkedin",
+      "description": "Searches jobs, imports saved postings, and finds hiring managers.",
+      "authType": "OAUTH",
+      "connected": false,
+      "permissions": ["SEARCH_JOBS", "READ_JOB_DETAILS", "SYNC_SAVED_JOBS"],
+      "approvalRequired": ["SEND_RECRUITER_EMAIL"],
+      "allowed": ["Search job listings", "Import saved jobs", "Read job details"],
+      "disallowed": ["Messaging without approval", "Editing profile", "Autonomous apply"]
+    },
+    {
+      "id": "naukri",
+      "name": "Naukri Connector",
+      "category": "Job Platforms",
+      "icon": "briefcase",
+      "description": "Searches Indian enterprise and tech hiring boards.",
+      "authType": "USER_AUTHORIZED",
+      "connected": false,
+      "permissions": ["SEARCH_JOBS", "READ_JOB_DETAILS"],
+      "allowed": ["Query job postings", "Extract requirements"],
+      "disallowed": ["Autonomous application submission"]
+    },
+    {
+      "id": "indeed",
+      "name": "Indeed Connector",
+      "category": "Job Platforms",
+      "icon": "globe",
+      "description": "Aggregated job search and direct posting synchronization.",
+      "authType": "USER_AUTHORIZED",
+      "connected": false,
+      "permissions": ["SEARCH_JOBS", "READ_JOB_DETAILS"],
+      "allowed": ["Search postings", "Read compensation and location"],
+      "disallowed": ["Autonomous application submission"]
+    },
+    {
+      "id": "wellfound",
+      "name": "Wellfound (AngelList)",
+      "category": "Job Platforms",
+      "icon": "rocket",
+      "description": "Startup hiring, founder direct posts, and equity compensation details.",
+      "authType": "USER_AUTHORIZED",
+      "connected": false,
+      "permissions": ["SEARCH_JOBS", "READ_JOB_DETAILS"],
+      "allowed": ["Discover startup engineering roles", "Read tech stacks"],
+      "disallowed": ["Autonomous messaging"]
+    },
+    {
+      "id": "gmail",
+      "name": "Gmail Job Alerts Ingest",
+      "category": "Communication",
+      "icon": "mail",
+      "description": "Ingests job notifications, recruiter inquiries, and creates draft replies.",
+      "authType": "OAUTH",
+      "connected": true,
+      "permissions": ["READ_JOB_ALERT_EMAILS", "CREATE_RECRUITER_DRAFT", "READ_REPLIES"],
+      "approvalRequired": ["SEND_RECRUITER_EMAIL"],
+      "allowed": ["Parse job alert emails", "Create draft responses", "Detect interview replies"],
+      "disallowed": ["Sending emails without explicit human approval"]
+    },
+    {
+      "id": "outlook",
+      "name": "Microsoft Outlook",
+      "category": "Communication",
+      "icon": "mail",
+      "description": "Office 365 job alerts and recruiter conversation synchronization.",
+      "authType": "OAUTH",
+      "connected": false,
+      "permissions": ["READ_JOB_ALERT_EMAILS", "CREATE_RECRUITER_DRAFT", "READ_REPLIES"],
+      "approvalRequired": ["SEND_RECRUITER_EMAIL"],
+      "allowed": ["Read alert emails", "Draft outreach"],
+      "disallowed": ["Send without approval"]
+    },
+    {
+      "id": "notion",
+      "name": "Notion Workspace Sync",
+      "category": "Productivity",
+      "icon": "file-text",
+      "description": "Bi-directional sync of your Job-hunt pipeline with your custom Notion database.",
+      "authType": "API_KEY",
+      "connected": false,
+      "permissions": ["SYNC_SAVED_JOBS"],
+      "allowed": ["Export tracked applications to Notion", "Sync status updates"],
+      "disallowed": ["Accessing unrelated Notion workspaces"]
+    },
+    {
+      "id": "apify",
+      "name": "Apify Scraping Actors",
+      "category": "Discovery",
+      "icon": "cpu",
+      "description": "Cloud crawler actors for complex JavaScript-heavy career sites.",
+      "authType": "API_KEY",
+      "connected": false,
+      "permissions": ["SEARCH_JOBS", "READ_JOB_DETAILS"],
+      "allowed": ["Execute cloud web scraper actors"],
+      "disallowed": ["Accessing user credentials"]
+    }
+  ]
+}
