@@ -1,3 +1,4 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -37,6 +38,23 @@ class Settings(BaseSettings):
     strong_match_threshold: float = 50.0
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080"
     rate_limit_per_minute: int = 120
+
+    @model_validator(mode="after")
+    def validate_production_secrets(self) -> "Settings":
+        if self.environment not in ("local", "test"):
+            if self.auth_mode == "test":
+                raise ValueError("auth_mode='test' is not permitted outside local/test environments")
+            if self.test_jwt_secret == "jobhunt-test-secret-32b-minimum-key!":
+                raise ValueError("test_jwt_secret must be overridden outside local/test environments")
+            if self.token_encryption_key == "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=":
+                raise ValueError("token_encryption_key must be configured outside local/test environments")
+            if not self.clerk_issuer or not self.clerk_jwks_url:
+                raise ValueError("Clerk credentials must be configured outside local/test environments")
+            if "jobhunt:jobhunt@127.0.0.1" in self.database_url:
+                raise ValueError("database_url must point to a real database outside local/test environments")
+            if not self.uat_signoff_secret:
+                raise ValueError("uat_signoff_secret must be configured outside local/test environments")
+        return self
 
 
 settings = Settings()
