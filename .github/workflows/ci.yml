@@ -1,0 +1,86 @@
+name: ci
+on:
+  push:
+    paths:
+      - "**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
+  python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: jobhunt
+          POSTGRES_PASSWORD: jobhunt
+          POSTGRES_DB: jobhunt
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jobhunt"
+          --health-interval 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://jobhunt:jobhunt@127.0.0.1:5432/jobhunt
+      AUTH_MODE: test
+      TEST_JWT_SECRET: jobhunt-test-secret-32b-minimum-key!
+      UAT_SIGNOFF_SECRET: ci-uat-signoff-secret
+      ALLOW_GMAIL_OAUTH_DEV: "true"
+      GMAIL_REDIRECT_URI: http://localhost:8000/api/v1/sources/gmail_alerts/oauth/callback
+      GMAIL_REDIRECT_ALLOWLIST: http://localhost:8000/api/v1/sources/gmail_alerts/oauth/callback
+      GMAIL_CLIENT_ID: ci-test-client
+      GMAIL_CLIENT_SECRET: ci-test-secret
+      UAT_ADMIN_USER_IDS: uat_admin_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e packages/domain -e packages/connectors -e packages/agents -e packages/policy -e packages/tailoring -e apps/api -e apps/worker pytest ruff httpx
+      - run: ruff check packages apps/api apps/worker tests
+      - run: pytest tests/unit -q
+      - name: UAT integration
+        run: |
+          python scripts/apply_migrations.py
+          pytest tests/integration tests/e2e -q
+      - run: python scripts/export_openapi.py
+      - run: python scripts/check_openapi.py
+      - name: validate migrations
+        run: python scripts/apply_migrations.py
+
+  compose-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/deploy
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose -f compose.yml up -d --build
+      - run: |
+          for i in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:8000/api/v1/health && curl -fsS http://127.0.0.1:8000/api/v1/ready && curl -fsS http://127.0.0.1:8001/health && exit 0
+            sleep 3
+          done
+          docker compose -f compose.yml logs
+          exit 1
+      - run: docker compose -f compose.yml down -v
