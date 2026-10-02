@@ -147,8 +147,8 @@ export function ProfilePage() {
       {us ? <p className="text-sm">US sponsorship fields enabled by feature flag.</p> : <p className="text-sm text-slate-500">H-1B / US sponsorship is hidden (FEATURE_US_MARKET=false).</p>}
       <div className="flex flex-wrap gap-2">
         <button type="submit" className="rounded-md bg-amber-700 px-4 py-2 text-white">Save profile</button>
-        <button type="button" className="rounded-md border px-4 py-2 text-sm" onClick={() => fetch((import.meta.env.VITE_API_BASE || "/api/v1") + "/profile/export", { method: "POST", headers: { authorization: `Bearer ${localStorage.getItem("jobhunt_test_token")}` } })}>Export data</button>
-        <button type="button" className="rounded-md border px-4 py-2 text-sm" onClick={() => fetch((import.meta.env.VITE_API_BASE || "/api/v1") + "/profile/delete", { method: "POST", headers: { authorization: `Bearer ${localStorage.getItem("jobhunt_test_token")}` } })}>Delete data</button>
+        <button type="button" className="rounded-md border px-4 py-2 text-sm" onClick={() => endpoints.exportProfile()}>Export data</button>
+        <button type="button" className="rounded-md border px-4 py-2 text-sm" onClick={() => endpoints.deleteProfile()}>Delete data</button>
       </div>
       <p className="text-sm text-slate-500">Notifications and billing settings: in-app prefs on API; billing is planned.</p>
     </form>

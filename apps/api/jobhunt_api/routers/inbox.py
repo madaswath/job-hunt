@@ -74,6 +74,7 @@ def act(item_id: str, body: InboxAction, user: dict = Depends(current_user)) -> 
     row = db.fetch_one("SELECT id, state FROM inbox_items WHERE id = %s AND user_id = %s", (item_id, user["user_id"]))
     if not row:
         raise HTTPException(404, "not found")
+    state = row["state"]
     if body.action == "reject":
         db.execute("UPDATE inbox_items SET rejected = true, updated_at = now() WHERE id = %s AND user_id = %s", (item_id, user["user_id"]))
         db.execute(
@@ -87,16 +88,22 @@ def act(item_id: str, body: InboxAction, user: dict = Depends(current_user)) -> 
             (user["user_id"], item_id),
         )
     elif body.action == "request_analysis":
+        if state != "review_required":
+            raise HTTPException(409, "analysis can only be requested from review_required")
         db.execute(
             "INSERT INTO approval_tasks (user_id, inbox_item_id, kind, status, payload) VALUES (%s, %s, %s, 'pending', '{}'::jsonb)",
             (user["user_id"], item_id, body.action),
         )
     elif body.action == "prepare_application":
+        if state != "review_required":
+            raise HTTPException(409, "prepare_application requires review_required")
         db.execute(
             "INSERT INTO approval_tasks (user_id, inbox_item_id, kind, status, payload) VALUES (%s, %s, %s, 'pending', '{}'::jsonb)",
             (user["user_id"], item_id, "prepare_application"),
         )
     elif body.action == "request_draft_approval":
+        if state != "tailored":
+            raise HTTPException(409, "draft approval requires tailored state")
         approval_svc.create_draft_approval_task(user["user_id"], item_id)
     else:
         raise HTTPException(400, "unknown action")

@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from pydantic import BaseModel, Field, field_validator
+
 from jobhunt_connectors.contract import ConnectorCapabilities, ConnectorPolicy, RawCapture
 from jobhunt_connectors.normalize import normalize_capture
 
@@ -13,6 +15,20 @@ DEFAULT_LABELS = ("JobAlerts", "Jobs")
 
 # Minimum scope: read-only Gmail; ingestion uses label-scoped search only (no send/modify).
 GMAIL_OAUTH_SCOPES = ("https://www.googleapis.com/auth/gmail.readonly",)
+
+
+class GmailIngestRequest(BaseModel):
+    use_gmail_api: bool = False
+    fixture_path: str | None = None
+    labels: list[str] = Field(default_factory=lambda: list(DEFAULT_LABELS))
+    max_messages: int = Field(default=25, ge=1, le=100)
+    seen_message_ids: list[str] = Field(default_factory=list)
+
+    @field_validator("labels")
+    @classmethod
+    def _nonempty_labels(cls, value: list[str]) -> list[str]:
+        cleaned = [item.strip() for item in value if item and item.strip()]
+        return cleaned or list(DEFAULT_LABELS)
 
 
 class GmailAlertsConnector:
@@ -39,13 +55,14 @@ class GmailAlertsConnector:
         return {"status": "connected", "labels": labels, "consent_required": True}
 
     def ingest(self, ctx: dict[str, Any], query: dict[str, Any]) -> list[RawCapture]:
-        if query.get("use_gmail_api") or ctx.get("access_token"):
-            return self._ingest_gmail_api(ctx, query)
-        path = Path(query.get("fixture_path") or ctx.get("fixture_path") or FIXTURE_PATH)
+        req = GmailIngestRequest.model_validate(query or {})
+        if req.use_gmail_api or ctx.get("access_token"):
+            return self._ingest_gmail_api(ctx, req)
+        path = Path(req.fixture_path or ctx.get("fixture_path") or FIXTURE_PATH)
         if not path.exists():
             return []
         items = json.loads(path.read_text())
-        allowed = {label.lower() for label in (query.get("labels") or ctx.get("labels") or DEFAULT_LABELS)}
+        allowed = {label.lower() for label in req.labels}
         captures: list[RawCapture] = []
         for item in items:
             labels = {str(x).lower() for x in (item.get("labels") or [])}
@@ -62,20 +79,21 @@ class GmailAlertsConnector:
                     }
                 )
             )
-        max_n = int(query.get("max_messages") or ctx.get("max_messages") or 25)
-        return captures[:max_n]
+        return captures[: req.max_messages]
 
-    def _ingest_gmail_api(self, ctx: dict[str, Any], query: dict[str, Any]) -> list[RawCapture]:
+    def _ingest_gmail_api(self, ctx: dict[str, Any], req: GmailIngestRequest) -> list[RawCapture]:
         from jobhunt_connectors.gmail_api import fetch_labeled_messages
         from jobhunt_connectors.gmail_failures import GmailFailureKind, GmailIngestError
 
         token = ctx.get("access_token")
         if not token:
             raise GmailIngestError(GmailFailureKind.NOT_CONFIGURED, "missing access_token")
-        labels = query.get("labels") or ctx.get("labels") or list(DEFAULT_LABELS)
-        max_n = int(query.get("max_messages") or ctx.get("max_messages") or 25)
-        seen = set(query.get("seen_message_ids") or [])
-        items, _page = fetch_labeled_messages(token, labels, max_messages=max_n, seen_ids=seen)
+        items, _page = fetch_labeled_messages(
+            token,
+            req.labels,
+            max_messages=req.max_messages,
+            seen_ids=set(req.seen_message_ids),
+        )
         captures: list[RawCapture] = []
         for item in items:
             captures.append(

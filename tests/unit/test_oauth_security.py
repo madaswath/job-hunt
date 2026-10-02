@@ -23,23 +23,19 @@ def test_state_signature_roundtrip():
 
 
 def test_label_allowlist(monkeypatch):
-    monkeypatch.setenv("GMAIL_ALLOWED_LABELS", "JobAlerts,Jobs")
-    import jobhunt_api.services.oauth_security as oauth_sec
-    from jobhunt_api import settings as settings_mod
+    from jobhunt_api.settings import settings
 
-    oauth_sec.settings = settings_mod.Settings()
+    monkeypatch.setattr(settings, "gmail_allowed_labels", "JobAlerts,Jobs")
     assert filter_allowed_labels(["JobAlerts"]) == ["JobAlerts"]
     with pytest.raises(OAuthSecurityError):
         filter_allowed_labels(["Personal"])
 
 
 def test_redirect_allowlist(monkeypatch):
-    monkeypatch.setenv("GMAIL_REDIRECT_URI", "http://localhost:8000/api/v1/cb")
-    monkeypatch.setenv("GMAIL_REDIRECT_ALLOWLIST", "http://localhost:8000/api/v1/cb")
-    import jobhunt_api.services.oauth_security as oauth_sec
-    from jobhunt_api import settings as settings_mod
+    from jobhunt_api.settings import settings
 
-    oauth_sec.settings = settings_mod.Settings()
+    monkeypatch.setattr(settings, "gmail_redirect_uri", "http://localhost:8000/api/v1/cb")
+    monkeypatch.setattr(settings, "gmail_redirect_allowlist", "http://localhost:8000/api/v1/cb")
     assert_redirect_allowed("http://localhost:8000/api/v1/cb")
     with pytest.raises(OAuthSecurityError):
         assert_redirect_allowed("http://evil.example/cb")

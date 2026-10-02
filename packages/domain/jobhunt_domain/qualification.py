@@ -15,8 +15,6 @@ def apply_hard_filters(job: JobPosting, profile: CandidateProfile) -> list[str]:
         reasons.append("banned_company")
     if title and any(_norm(b) and _norm(b) in title for b in profile.banned_roles):
         reasons.append("banned_role")
-    if not job.source_trusted:
-        reasons.append("untrusted_source")
 
     if profile.seniority and job.seniority:
         cand = _norm(profile.seniority)

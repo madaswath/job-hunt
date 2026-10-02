@@ -67,7 +67,17 @@ def test_match_v2_strong():
     assert abs(sum(f.weight for f in result.breakdown) - 1) < 1e-6
 
 
-def test_match_v2_hard_filter_zeroes_score():
+def test_match_v2_untrusted_source_is_risk_not_gate():
     result = score_match_v2(job(source_trusted=False), profile())
-    assert result.overall_score == 0
-    assert "untrusted_source" in result.hard_filter_reasons
+    assert result.overall_score > 0
+    assert result.passed_hard_filters is True
+    assert "untrusted_source" in result.risks
+    assert "untrusted_source" not in result.hard_filter_reasons
+
+
+def test_match_v2_hard_filter_zeroes_score():
+    p = profile()
+    p.banned_roles = ["intern"]
+    blocked = score_match_v2(job(title="Intern GenAI Engineer"), p)
+    assert blocked.overall_score == 0
+    assert "banned_role" in blocked.hard_filter_reasons

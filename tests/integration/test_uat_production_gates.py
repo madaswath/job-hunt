@@ -10,20 +10,28 @@ def uat_env(monkeypatch):
     monkeypatch.setenv("UAT_SIGNOFF_SECRET", "test-signoff-secret")
     monkeypatch.setenv("UAT_ADMIN_USER_IDS", "uat_admin_ci")
     monkeypatch.setenv("ALLOW_GMAIL_OAUTH_DEV", "true")
+    monkeypatch.setenv("FEATURE_EXTERNAL_GMAIL", "false")
     monkeypatch.setenv("GMAIL_CLIENT_ID", "ci-test-client")
     monkeypatch.setenv("GMAIL_CLIENT_SECRET", "ci-test-secret")
     monkeypatch.setenv("GMAIL_REDIRECT_URI", "http://localhost:8000/api/v1/sources/gmail_alerts/oauth/callback")
     monkeypatch.setenv("GMAIL_REDIRECT_ALLOWLIST", "http://localhost:8000/api/v1/sources/gmail_alerts/oauth/callback")
-    from jobhunt_api import settings as settings_mod
+    from jobhunt_api.settings import settings
 
-    settings_mod.settings = settings_mod.Settings()
+    settings.uat_signoff_secret = "test-signoff-secret"
+    settings.uat_admin_user_ids = "uat_admin_ci"
+    settings.allow_gmail_oauth_dev = True
+    settings.feature_external_gmail = False
+    settings.gmail_client_id = "ci-test-client"
+    settings.gmail_client_secret = "ci-test-secret"
+    settings.gmail_redirect_uri = "http://localhost:8000/api/v1/sources/gmail_alerts/oauth/callback"
+    settings.gmail_redirect_allowlist = "http://localhost:8000/api/v1/sources/gmail_alerts/oauth/callback"
 
 
 def test_gmail_oauth_blocked_without_signoff(client, auth_a, monkeypatch):
     monkeypatch.setenv("ALLOW_GMAIL_OAUTH_DEV", "false")
-    from jobhunt_api import settings as settings_mod
+    from jobhunt_api.settings import settings
 
-    settings_mod.settings = settings_mod.Settings()
+    settings.allow_gmail_oauth_dev = False
     r = client.post("/api/v1/sources/gmail_alerts/oauth/start", headers=auth_a, json={"labels": ["JobAlerts"]})
     assert r.status_code == 403
 
@@ -57,7 +65,7 @@ def test_uat_signoff_enables_oauth_start(client, auth_a, uat_admin_auth):
 
 
 @patch("jobhunt_api.services.gmail_oauth.httpx.Client")
-def test_oauth_callback_pkce_and_revoke(client, auth_a, uat_admin_auth, mock_client_cls):
+def test_oauth_callback_pkce_and_revoke(mock_client_cls, client, auth_a, uat_admin_auth):
     client.get("/api/v1/me", headers=uat_admin_auth)
     client.post(
         "/api/v1/uat/signoff",
@@ -84,9 +92,9 @@ def test_signoff_invalidated_on_config_drift(client, uat_admin_auth, monkeypatch
 
     assert production_gates.uat_signoff_active("gmail_alerts")
     monkeypatch.setenv("TOKEN_ENCRYPTION_KEY", "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=")
-    from jobhunt_api import settings as settings_mod
+    from jobhunt_api.settings import settings
 
-    settings_mod.settings = settings_mod.Settings()
+    settings.token_encryption_key = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
     assert not production_gates.uat_signoff_active("gmail_alerts")
 
 

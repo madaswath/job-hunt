@@ -1,13 +1,29 @@
 const BASE = import.meta.env.VITE_API_BASE || "/api/v1";
 
+type ClerkSession = { getToken: () => Promise<string | null> };
+type ClerkGlobal = { Clerk?: { session?: ClerkSession | null } };
+
+export function clerkEnabled(): boolean {
+  return Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+}
+
 export function getTestToken(): string | null {
   return localStorage.getItem("jobhunt_test_token");
 }
 
+export async function resolveAuthToken(
+  clerk: ClerkGlobal["Clerk"] | undefined = (window as ClerkGlobal).Clerk,
+  useClerk: boolean = clerkEnabled(),
+): Promise<string | null> {
+  if (useClerk) {
+    if (!clerk?.session) return null;
+    return (await clerk.session.getToken()) ?? null;
+  }
+  return getTestToken();
+}
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = getTestToken() || (window as unknown as { Clerk?: { session?: { getToken: () => Promise<string> } } }).Clerk?.session
-    ? await (window as unknown as { Clerk: { session: { getToken: () => Promise<string> } } }).Clerk.session.getToken()
-    : getTestToken();
+  const token = await resolveAuthToken();
   const headers = new Headers(init.headers);
   headers.set("content-type", "application/json");
   if (token) headers.set("authorization", `Bearer ${token}`);
@@ -43,6 +59,8 @@ export const endpoints = {
   ingestSource: (connectorId: string, body: unknown) =>
     api<{ scan_job_id: string; status: string }>(`/sources/${connectorId}/ingest`, { method: "POST", body: JSON.stringify(body) }),
   createOutreachDraft: (body: unknown) => api<{ draft: OutreachDraft }>("/outreach/drafts", { method: "POST", body: JSON.stringify(body) }),
+  exportProfile: () => api<Record<string, unknown>>("/profile/export", { method: "POST" }),
+  deleteProfile: () => api<Record<string, unknown>>("/profile/delete", { method: "POST" }),
 };
 
 export type InboxItem = {

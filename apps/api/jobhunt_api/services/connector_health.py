@@ -36,7 +36,7 @@ def connector_dashboard(user_id: str) -> list[dict]:
             """
             SELECT connector_id,
               count(*) FILTER (WHERE status = 'completed')::int AS completed,
-              count(*) FILTER (WHERE status = 'failed')::int AS failed,
+              count(*) FILTER (WHERE status IN ('failed','dead_letter'))::int AS failed,
               count(*) FILTER (WHERE status IN ('queued','running'))::int AS backlog
             FROM scan_jobs WHERE user_id = %s
             GROUP BY connector_id
@@ -87,9 +87,9 @@ def worker_connector_summary() -> dict:
         WHERE status = 'running' AND leased_until IS NOT NULL AND leased_until < now() - interval '5 minutes'
         """,
     )
-    dead = db.fetch_one("SELECT count(*)::int AS n FROM scan_jobs WHERE status = 'failed'")
+    dead = db.fetch_one("SELECT count(*)::int AS n FROM scan_jobs WHERE status IN ('failed','dead_letter')")
     retries = db.fetch_one(
-        "SELECT count(*)::int AS n FROM scan_jobs WHERE attempts > 1 AND status IN ('queued','running','failed')",
+        "SELECT count(*)::int AS n FROM scan_jobs WHERE attempts > 1 AND status IN ('queued','running','failed','dead_letter')",
     )
     expiring = db.fetch_one(
         """

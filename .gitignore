@@ -11,3 +11,12 @@ test-results/
 .env
 *.egg-info/
 .DS_Store
+
+# Parent Job_Agents workspace leftovers; not part of this product tree
+/career-ops/
+/job-hunt/
+/.linkedin-test-profile/
+/job-test-output/
+/linkedin_*.py
+/linkedin_session.json
+/*.html

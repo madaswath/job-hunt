@@ -1,6 +1,28 @@
 from pydantic import BaseModel, Field
 
 
+class VerifiedFact(BaseModel):
+    kind: str
+    value: str
+    source: str = "manual"
+    verified: bool = True
+    evidence_id: str | None = None
+
+
+class SourceDefinition(BaseModel):
+    source_id: str
+    source_type: str
+    display_name: str
+    base_url: str | None = None
+    acquisition_mode: str
+    implementation_status: str
+    refresh_interval_minutes: int | None = None
+    allowed_operations: list[str] = Field(default_factory=list)
+    forbidden_operations: list[str] = Field(default_factory=list)
+    retention_days: int = 90
+    terms_summary: str = ""
+
+
 class CandidateProfile(BaseModel):
     skills: list[str] = Field(default_factory=list)
     target_titles: list[str] = Field(default_factory=list)
@@ -39,6 +61,15 @@ class JobPosting(BaseModel):
     source_trusted: bool = True
     company_type: str | None = None
     posted_at: str | None = None
+    canonical_job_id: str | None = None
+    external_job_id: str | None = None
+    source_type: str | None = None
+    source_url: str | None = None
+    apply_url: str | None = None
+    company_canonical_id: str | None = None
+    content_hash: str | None = None
+    capture_id: str | None = None
+    field_completeness: float | None = None
 
 
 class FactorScore(BaseModel):
@@ -61,3 +92,12 @@ class MatchResult(BaseModel):
     evidence_ids: list[str] = Field(default_factory=list)
     passed_hard_filters: bool = True
     hard_filter_reasons: list[str] = Field(default_factory=list)
+    ranking_version: str = "match_v2"
+    job_id: str | None = None
+    user_id: str | None = None
+
+
+class JobMatch(MatchResult):
+    """Stored per-user match against the shared or personal catalogue."""
+
+    ranking_version: str = "match_v2"

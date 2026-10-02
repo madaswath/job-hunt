@@ -64,3 +64,32 @@ def test_cross_tenant_documents_denied(client, auth_a, auth_b):
     )
     b_docs = client.get("/api/v1/documents", headers=auth_b).json()["items"]
     assert b_docs == []
+
+
+def test_generate_requires_approved_prepare_task(client, auth_a):
+    client.put("/api/v1/profile", json=_profile(), headers=auth_a)
+    client.post("/api/v1/discovery/scans", json={"connector_id": "public_ats_fixture"}, headers=auth_a)
+    run_once()
+    item_id = client.get("/api/v1/inbox", headers=auth_a).json()["items"][0]["id"]
+    client.post(f"/api/v1/inbox/{item_id}/actions", json={"action": "prepare_application"}, headers=auth_a)
+    pending = next(t for t in client.get("/api/v1/approvals", headers=auth_a).json()["pending"] if t["kind"] == "prepare_application")
+    denied = client.post(
+        "/api/v1/documents/generate",
+        headers=auth_a,
+        json={"inbox_item_id": item_id, "approval_task_id": pending["id"]},
+    )
+    assert denied.status_code == 403
+    item = client.get(f"/api/v1/inbox/{item_id}", headers=auth_a).json()["item"]
+    assert item["state"] == "review_required"
+
+
+def test_prepare_rejected_outside_review_required(client, auth_a):
+    client.put("/api/v1/profile", json=_profile(), headers=auth_a)
+    client.post("/api/v1/discovery/scans", json={"connector_id": "public_ats_fixture"}, headers=auth_a)
+    run_once()
+    item_id = client.get("/api/v1/inbox", headers=auth_a).json()["items"][0]["id"]
+    client.post(f"/api/v1/inbox/{item_id}/actions", json={"action": "prepare_application"}, headers=auth_a)
+    prepare = next(t for t in client.get("/api/v1/approvals", headers=auth_a).json()["pending"] if t["kind"] == "prepare_application")
+    client.post(f"/api/v1/approvals/{prepare['id']}/decide", json={"decision": "approved"}, headers=auth_a)
+    again = client.post(f"/api/v1/inbox/{item_id}/actions", json={"action": "prepare_application"}, headers=auth_a)
+    assert again.status_code == 409

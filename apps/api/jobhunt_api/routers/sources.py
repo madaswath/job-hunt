@@ -38,6 +38,9 @@ class BrowserCaptureIn(BaseModel):
 class IngestIn(BaseModel):
     labels: list[str] = Field(default_factory=list)
     fixture_path: str | None = None
+    use_gmail_api: bool = False
+    max_messages: int | None = Field(default=None, ge=1, le=100)
+    seen_message_ids: list[str] = Field(default_factory=list)
 
 
 @router.get("/sources")

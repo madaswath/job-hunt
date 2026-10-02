@@ -135,6 +135,8 @@ def score_match_v2(job: JobPosting, profile: CandidateProfile, evidence_ids: lis
 
     reasons = [f.reason for f in factors if f.score >= 0.8]
     risks = list(hard) + [f.reason for f in factors if f.score < 0.4]
+    if not job.source_trusted:
+        risks.append("untrusted_source")
     freshness = _freshness_hours(job.posted_at)
     known = 8 - len(set(unknown))
     confidence = round(max(0.2, min(0.99, known / 8)), 2)

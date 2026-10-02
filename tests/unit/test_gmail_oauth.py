@@ -11,19 +11,19 @@ def test_oauth_configured_requires_all_fields():
         assert not gmail_oauth.oauth_configured()
 
 
-@patch("jobhunt_api.services.oauth_security.settings")
+@patch("jobhunt_api.services.oauth_security.get_settings")
 @patch("jobhunt_api.services.gmail_oauth.settings")
 @patch("jobhunt_api.services.gmail_oauth.db")
-def test_start_oauth_returns_url(db_mock, s_gmail, s_oauth):
+def test_start_oauth_returns_url(db_mock, s_gmail, get_settings):
     db_mock.execute = MagicMock()
-    for s in (s_gmail, s_oauth):
-        s.gmail_client_id = "cid"
-        s.gmail_client_secret = "sec"
-        s.gmail_redirect_uri = "http://localhost/cb"
-        s.gmail_redirect_allowlist = "http://localhost/cb"
-        s.gmail_allowed_labels = "JobAlerts,Jobs"
-        s.oauth_state_secret = "test-oauth-state-secret-32chars!!"
-        s.test_jwt_secret = "test-oauth-state-secret-32chars!!"
+    s_gmail.gmail_client_id = "cid"
+    s_gmail.gmail_client_secret = "sec"
+    s_gmail.gmail_redirect_uri = "http://localhost/cb"
+    s_gmail.gmail_redirect_allowlist = "http://localhost/cb"
+    s_gmail.gmail_allowed_labels = "JobAlerts,Jobs"
+    s_gmail.oauth_state_secret = "test-oauth-state-secret-32chars!!"
+    s_gmail.test_jwt_secret = "test-oauth-state-secret-32chars!!"
+    get_settings.return_value = s_gmail
     out = gmail_oauth.start_oauth("user_1", ["JobAlerts"])
     assert "auth_url" in out
     assert "state" in out

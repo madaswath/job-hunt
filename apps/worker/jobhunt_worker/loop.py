@@ -17,7 +17,7 @@ metrics_app = FastAPI(title="Job-hunt worker")
 @metrics_app.get("/health")
 def health() -> dict:
     backlog = db.fetch_one("SELECT count(*)::int AS n FROM scan_jobs WHERE status IN ('queued','running')")
-    failed = db.fetch_one("SELECT count(*)::int AS n FROM scan_jobs WHERE status = 'failed'")
+    failed = db.fetch_one("SELECT count(*)::int AS n FROM scan_jobs WHERE status IN ('failed','dead_letter')")
     retries = db.fetch_one("SELECT coalesce(sum(attempts),0)::int AS n FROM scan_jobs")
     external = os.environ.get("FEATURE_EXTERNAL_GMAIL", "false").lower() in {"1", "true", "yes", "on"}
     return {

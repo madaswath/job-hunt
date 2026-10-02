@@ -71,6 +71,11 @@ def process_scan_job(job_row: dict) -> dict:
 
 
 def _ingest_one(user_id: str, connector, raw: RawCapture, profile: CandidateProfile) -> bool:
+    with db.unit_of_work():
+        return _ingest_one_tx(user_id, connector, raw, profile)
+
+
+def _ingest_one_tx(user_id: str, connector, raw: RawCapture, profile: CandidateProfile) -> bool:
     normalized = connector.normalize(raw)
     existing = db.fetch_one(
         """
@@ -271,54 +276,53 @@ def deliver_outbox(event: dict) -> None:
 
 
 def claim_scan_jobs(limit: int = 5, lease_seconds: int = 60) -> list[dict]:
-    db.execute(
-        """
-        UPDATE scan_jobs SET status = 'queued', leased_until = NULL
-        WHERE status = 'running' AND leased_until IS NOT NULL AND leased_until < now()
-        """
-    )
+    with db.unit_of_work():
+        db.execute(
+            """
+            UPDATE scan_jobs SET status = 'queued', leased_until = NULL
+            WHERE status = 'running' AND leased_until IS NOT NULL AND leased_until < now()
+            """
+        )
+        return db.fetch_all(
+            """
+            UPDATE scan_jobs
+            SET status = 'running',
+                attempts = attempts + 1,
+                leased_until = now() + (%s || ' seconds')::interval,
+                updated_at = now()
+            WHERE id IN (
+              SELECT id FROM scan_jobs
+              WHERE status IN ('queued', 'running')
+                AND (leased_until IS NULL OR leased_until < now())
+                AND attempts < max_attempts
+              ORDER BY created_at
+              FOR UPDATE SKIP LOCKED
+              LIMIT %s
+            )
+            RETURNING *
+            """,
+            (str(lease_seconds), limit),
+        )
+
+
+def claim_outbox(limit: int = 10, lease_seconds: int = 30) -> list[dict]:
     return db.fetch_all(
         """
-        UPDATE scan_jobs
+        UPDATE outbox_events
         SET status = 'running',
             attempts = attempts + 1,
-            leased_until = now() + (%s || ' seconds')::interval,
-            updated_at = now()
+            leased_until = now() + (%s || ' seconds')::interval
         WHERE id IN (
-          SELECT id FROM scan_jobs
-          WHERE status IN ('queued', 'running')
-            AND (leased_until IS NULL OR leased_until < now())
+          SELECT id FROM outbox_events
+          WHERE status = 'pending' OR (status = 'running' AND leased_until < now())
           ORDER BY created_at
+          FOR UPDATE SKIP LOCKED
           LIMIT %s
         )
         RETURNING *
         """,
         (str(lease_seconds), limit),
     )
-
-
-def claim_outbox(limit: int = 10, lease_seconds: int = 30) -> list[dict]:
-    rows = db.fetch_all(
-        """
-        SELECT * FROM outbox_events
-        WHERE status = 'pending' OR (status = 'running' AND leased_until < now())
-        ORDER BY created_at
-        LIMIT %s
-        """,
-        (limit,),
-    )
-    claimed = []
-    for row in rows:
-        db.execute(
-            """
-            UPDATE outbox_events SET status = 'running', attempts = attempts + 1,
-              leased_until = now() + (%s || ' seconds')::interval
-            WHERE id = %s
-            """,
-            (str(lease_seconds), row["id"]),
-        )
-        claimed.append(row)
-    return claimed
 
 
 def complete_scan(job_id: str, ok: bool, error: str | None = None) -> None:
@@ -329,7 +333,7 @@ def complete_scan(job_id: str, ok: bool, error: str | None = None) -> None:
         )
         return
     row = db.fetch_one("SELECT attempts, max_attempts FROM scan_jobs WHERE id = %s", (job_id,))
-    status = "failed" if row and row["attempts"] >= row["max_attempts"] else "queued"
+    status = "dead_letter" if row and row["attempts"] >= row["max_attempts"] else "queued"
     backoff = min(300, 2 ** (row["attempts"] if row else 1))
     db.execute(
         """

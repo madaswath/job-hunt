@@ -23,6 +23,8 @@ def generate_drafts_for_inbox(user_id: str, inbox_item_id: str, approval_id: str
         raise ValueError("approval task not found")
     if task["kind"] != "prepare_application":
         raise PermissionError("invalid approval task kind for document generation")
+    if task["status"] != "approved":
+        raise PermissionError("approval task is not approved")
 
     item = db.fetch_one(
         """
@@ -51,25 +53,26 @@ def generate_drafts_for_inbox(user_id: str, inbox_item_id: str, approval_id: str
     agents.finish_run(user_id, s_run, {"kinds": ["cv_variant", "cover_letter", "application_answers"]})
 
     docs = []
-    for kind, content in [("cv_variant", cv), ("cover_letter", cover), ("application_answers", answers)]:
-        d_run = agents.start_run(user_id, "dharma", "fact_gate", {"kind": kind})
-        gate = fact_gate(content, facts, bits)
-        agents.finish_run(user_id, d_run, gate)
-        status = "ready" if gate["passed"] else "blocked"
-        doc_id = str(uuid.uuid4())
-        db.execute(
-            """
-            INSERT INTO tailored_documents (id, user_id, inbox_item_id, kind, status, content, fact_gate_passed)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """,
-            (doc_id, user_id, inbox_item_id, kind, status, content, gate["passed"]),
-        )
-        docs.append({"id": doc_id, "kind": kind, "status": status, "fact_gate_passed": gate["passed"]})
+    with db.unit_of_work():
+        for kind, content in [("cv_variant", cv), ("cover_letter", cover), ("application_answers", answers)]:
+            d_run = agents.start_run(user_id, "dharma", "fact_gate", {"kind": kind})
+            gate = fact_gate(content, facts, bits)
+            agents.finish_run(user_id, d_run, gate)
+            status = "ready" if gate["passed"] else "blocked"
+            doc_id = str(uuid.uuid4())
+            db.execute(
+                """
+                INSERT INTO tailored_documents (id, user_id, inbox_item_id, kind, status, content, fact_gate_passed)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """,
+                (doc_id, user_id, inbox_item_id, kind, status, content, gate["passed"]),
+            )
+            docs.append({"id": doc_id, "kind": kind, "status": status, "fact_gate_passed": gate["passed"]})
 
-    all_pass = all(d["fact_gate_passed"] for d in docs)
-    if all_pass and item["state"] == "review_required":
-        transition_inbox(user_id, inbox_item_id, "review_required", "tailored", "dharma_passed", approval_id)
-    audit.record(user_id, "documents_generated", "inbox_item", inbox_item_id, {"approval_id": approval_id, "all_pass": all_pass})
+        all_pass = all(d["fact_gate_passed"] for d in docs)
+        if all_pass and item["state"] == "review_required":
+            transition_inbox(user_id, inbox_item_id, "review_required", "tailored", "dharma_passed", approval_id)
+        audit.record(user_id, "documents_generated", "inbox_item", inbox_item_id, {"approval_id": approval_id, "all_pass": all_pass})
     return {"documents": docs, "all_pass": all_pass}
 
 

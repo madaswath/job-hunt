@@ -4,7 +4,7 @@ import hmac
 import secrets
 from urllib.parse import urlparse
 
-from jobhunt_api.settings import settings
+from jobhunt_api.settings import get_settings
 
 
 class OAuthSecurityError(Exception):
@@ -19,7 +19,8 @@ def generate_pkce() -> tuple[str, str]:
 
 
 def _state_secret() -> bytes:
-    raw = settings.oauth_state_secret or settings.test_jwt_secret
+    current = get_settings()
+    raw = current.oauth_state_secret or current.test_jwt_secret
     return raw.encode()
 
 
@@ -41,10 +42,11 @@ def _normalize_redirect(url: str) -> str:
 
 
 def assert_redirect_allowed(redirect_uri: str) -> None:
-    raw = settings.gmail_redirect_allowlist or ""
+    current = get_settings()
+    raw = current.gmail_redirect_allowlist or ""
     allowlist = [u.strip() for u in raw.split(",") if u.strip()]
-    if not allowlist and settings.gmail_redirect_uri:
-        allowlist = [settings.gmail_redirect_uri]
+    if not allowlist and current.gmail_redirect_uri:
+        allowlist = [current.gmail_redirect_uri]
     candidate = _normalize_redirect(redirect_uri)
     normalized = {_normalize_redirect(u) for u in allowlist}
     if candidate not in normalized:
@@ -52,7 +54,7 @@ def assert_redirect_allowed(redirect_uri: str) -> None:
 
 
 def filter_allowed_labels(requested: list[str]) -> list[str]:
-    allowed = {label.lower() for label in settings.gmail_allowed_labels.split(",") if label.strip()}
+    allowed = {label.lower() for label in get_settings().gmail_allowed_labels.split(",") if label.strip()}
     if not allowed:
         return requested
     picked = [label for label in requested if label.lower() in allowed]

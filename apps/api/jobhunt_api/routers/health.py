@@ -20,7 +20,7 @@ def ready() -> dict:
 @router.get("/worker-metrics")
 def worker_metrics() -> dict:
     backlog = db.fetch_one("SELECT count(*)::int AS n FROM scan_jobs WHERE status IN ('queued','running')")
-    failed = db.fetch_one("SELECT count(*)::int AS n FROM scan_jobs WHERE status = 'failed'")
+    failed = db.fetch_one("SELECT count(*)::int AS n FROM scan_jobs WHERE status IN ('failed','dead_letter')")
     retries = db.fetch_one("SELECT coalesce(sum(attempts),0)::int AS n FROM scan_jobs")
     return {
         "backlog": backlog["n"] if backlog else 0,

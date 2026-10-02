@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { endpoints, type InboxItem } from "../lib/api/client";
 import { Empty, ErrorNote, Loading } from "../ui/States";
 
+function inboxActionsForState(state: string): string[] {
+  const actions = ["reject", "save"];
+  if (state === "review_required") actions.push("request_analysis", "prepare_application");
+  if (state === "tailored") actions.push("request_draft_approval");
+  return actions;
+}
+
 type InboxDetail = InboxItem & {
   captured_text?: string;
   content_hash?: string;
@@ -80,7 +87,7 @@ export function InboxPage() {
             </div>
           ) : null}
           <div className="mt-4 flex flex-wrap gap-2">
-            {["reject", "save", "request_analysis", "prepare_application", "request_draft_approval"].map((action) => (
+            {inboxActionsForState(active.state).map((action) => (
               <button
                 key={action}
                 type="button"

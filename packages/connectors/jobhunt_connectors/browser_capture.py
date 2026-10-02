@@ -14,7 +14,7 @@ class BrowserCaptureConnector:
             terms_summary="Candidate-initiated capture only. User submits URL, excerpt, and apply links; no automated marketplace scraping.",
             requires_explicit_consent=True,
             max_requests_per_hour=60,
-            allowed_operations=["browser_capture", "ingest", "health"],
+            allowed_operations=["connect", "browser_capture", "ingest", "health"],
             forbidden_operations=["send_email", "submit_application", "scrape_authenticated"],
             retention_days=180,
             data_classification="candidate_initiated_capture",

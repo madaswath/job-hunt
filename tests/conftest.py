@@ -9,6 +9,8 @@ from fastapi.testclient import TestClient
 os.environ.setdefault("AUTH_MODE", "test")
 os.environ.setdefault("TEST_JWT_SECRET", "jobhunt-test-secret-32b-minimum-key!")
 os.environ.setdefault("DATABASE_URL", "postgresql://jobhunt:jobhunt@127.0.0.1:5432/jobhunt")
+os.environ.setdefault("UAT_SIGNOFF_SECRET", "test-signoff-secret")
+os.environ.setdefault("UAT_ADMIN_USER_IDS", "uat_admin_ci")
 
 UAT_ADMIN_USER_ID = "uat_admin_ci"
 

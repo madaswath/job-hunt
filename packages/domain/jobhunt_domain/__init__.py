@@ -3,12 +3,17 @@ from jobhunt_domain.inbox_states import ALLOWED_TRANSITIONS, INBOX_PIPELINE, can
 from jobhunt_domain.india import INDIA_CITIES, ROLE_ALIASES
 from jobhunt_domain.matching import score_match_v2
 from jobhunt_domain.qualification import apply_hard_filters
+from jobhunt_domain.schemas import JobMatch, JobPosting, SourceDefinition, VerifiedFact
 
 __all__ = [
     "ALLOWED_TRANSITIONS",
     "INBOX_PIPELINE",
     "INDIA_CITIES",
     "ROLE_ALIASES",
+    "JobMatch",
+    "JobPosting",
+    "SourceDefinition",
+    "VerifiedFact",
     "apply_hard_filters",
     "can_transition",
     "normalize_ctc_inr_annual",
