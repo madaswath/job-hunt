@@ -1,0 +1,9 @@
+{
+  "capture_method": "browser_bookmarklet",
+  "source_url": "https://www.naukri.com/job-listings-example",
+  "title": "LLM Engineer",
+  "company": "Catalog Co",
+  "excerpt": "Candidate-initiated capture for Phase 3.",
+  "extracted_emails": [],
+  "extracted_apply_urls": ["https://www.naukri.com/job-listings-example"]
+}

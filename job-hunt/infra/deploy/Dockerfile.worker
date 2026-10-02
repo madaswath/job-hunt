@@ -1,0 +1,11 @@
+FROM python:3.12-slim
+WORKDIR /app
+COPY packages packages
+COPY apps/api apps/api
+COPY apps/worker apps/worker
+COPY tests/fixtures tests/fixtures
+RUN pip install --no-cache-dir \
+  -e packages/domain -e packages/connectors -e packages/agents \
+  -e packages/policy -e packages/tailoring -e apps/api -e apps/worker
+EXPOSE 8001
+CMD ["python", "-m", "jobhunt_worker"]

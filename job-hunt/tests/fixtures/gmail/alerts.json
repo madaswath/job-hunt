@@ -1,0 +1,21 @@
+[
+  {
+    "external_id": "gmail-msg-1001",
+    "source_url": "https://mail.google.com/mail/u/0/#inbox/msg-1001",
+    "company": "Example Labs",
+    "title": "GenAI Engineer — Bengaluru",
+    "location": "Bengaluru",
+    "excerpt": "New job alert: GenAI Engineer at Example Labs. Apply: https://boards.greenhouse.io/example/jobs/1001",
+    "description": "GenAI Engineer role in Bengaluru. Skills: python, rag. CTC 25-40 LPA.",
+    "extracted_emails": [],
+    "extracted_apply_urls": ["https://boards.greenhouse.io/example/jobs/1001"],
+    "labels": ["JobAlerts", "INBOX"],
+    "posted_at": "2026-09-28T00:00:00Z",
+    "skills": ["python", "rag"],
+    "must_have_skills": ["python"],
+    "work_mode": "hybrid",
+    "employment_type": "full-time",
+    "ctc_inr_annual_min": 2500000,
+    "ctc_inr_annual_max": 4000000
+  }
+]
