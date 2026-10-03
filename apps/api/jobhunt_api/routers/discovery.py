@@ -134,6 +134,12 @@ def demo1_refresh(body: Demo1RefreshIn, user: dict = Depends(current_user)) -> d
         payload = {**payload_base, "connector_id": connector_id}
         if connector_id == "gmail_alerts":
             payload["use_gmail_api"] = False
+        if connector_id == "linkedin":
+            payload["use_export_dir"] = True
+            payload["jobs_per_keyword"] = 100
+            payload["posts_limit"] = 15
+            payload["keywords"] = schedule_titles
+            payload["preferences"] = schedule_titles
         jobs.append(_queue_scan(user["user_id"], connector_id, payload))
 
     if body.enable_autopilot:
@@ -176,6 +182,60 @@ def demo1_refresh(body: Demo1RefreshIn, user: dict = Depends(current_user)) -> d
         "autopilot_enabled": body.enable_autopilot,
         "hint": "Start the worker, then open Review Inbox for ranked matches.",
     }
+
+
+class LinkedInMasterIngestIn(BaseModel):
+    export_dir: str | None = None
+    keywords: list[str] = Field(default_factory=list)
+    skills: list[str] = Field(default_factory=list)
+    preferences: list[str] = Field(default_factory=list)
+    jobs_per_keyword: int = Field(default=100, ge=1, le=200)
+    posts_limit: int = Field(default=15, ge=10, le=15)
+    match_into_inbox: bool = True
+
+
+class MatchSharedIn(BaseModel):
+    limit: int = Field(default=80, ge=1, le=300)
+
+
+@router.post("/discovery/linkedin-master-ingest")
+def linkedin_master_ingest(body: LinkedInMasterIngestIn, user: dict = Depends(current_user)) -> dict:
+    """Load scraper JSON/CSV drops into shared_jobs master index (100 jobs/keyword, 10–15 posts)."""
+    from jobhunt_api.services.linkedin_master import ingest_linkedin_master
+    from jobhunt_api.services.profile_loader import load_candidate_profile
+
+    source_svc.connect(user["user_id"], "linkedin", {})
+    profile = load_candidate_profile(user["user_id"])
+    skills = body.skills or list(profile.skills or [])
+    preferences = body.preferences or list(profile.target_titles or []) or list(BETA_DS_AI_TITLES)
+    result = ingest_linkedin_master(
+        user_id=user["user_id"],
+        export_dir=body.export_dir,
+        keywords=body.keywords or preferences,
+        skills=skills,
+        preferences=preferences,
+        jobs_per_keyword=body.jobs_per_keyword,
+        posts_limit=body.posts_limit,
+        match_user=body.match_into_inbox,
+    )
+    return {"status": "ok", **result}
+
+
+@router.post("/discovery/match-shared")
+def match_shared(body: MatchSharedIn, user: dict = Depends(current_user)) -> dict:
+    """Re-rank shared master catalogue into this user's Review Inbox."""
+    from jobhunt_api.services.linkedin_master import match_user_from_shared
+
+    created = match_user_from_shared(user["user_id"], limit=body.limit)
+    audit.record(user["user_id"], "shared_master_matched", "inbox", None, {"created": created})
+    return {"status": "ok", "inbox_matches_created": created}
+
+
+@router.get("/discovery/shared-jobs")
+def list_shared(user: dict = Depends(current_user), limit: int = 50) -> dict:
+    from jobhunt_api.services.shared_jobs import list_shared_jobs
+
+    return {"items": list_shared_jobs(limit=min(max(limit, 1), 200))}
 
 
 @router.post("/discovery/candidate-imports")

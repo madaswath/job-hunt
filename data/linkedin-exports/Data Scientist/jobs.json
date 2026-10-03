@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "keyword": "Data Scientist",
+    "engine": "sample-scraper-export"
+  },
+  "jobs": [
+    {
+      "job_id": "sample-ds-1",
+      "title": "Data Scientist",
+      "company": "Sample Analytics",
+      "location": "Bengaluru",
+      "url": "https://www.linkedin.com/jobs/view/sample-ds-1",
+      "description": "Python, SQL, experimentation for India marketplace.",
+      "posted_at": "2026-10-02T08:00:00Z",
+      "workplace_type": "hybrid",
+      "skills": ["python", "sql", "experimentation"],
+      "emails": ["jobs@sample-analytics.example"],
+      "application_urls": ["https://www.linkedin.com/jobs/view/sample-ds-1"]
+    },
+    {
+      "job_id": "sample-ds-2",
+      "title": "Senior Data Scientist",
+      "company": "Harbor Metrics",
+      "location": "Remote",
+      "url": "https://www.linkedin.com/jobs/view/sample-ds-2",
+      "description": "Causal inference and forecasting. Remote India.",
+      "posted_at": "2026-10-01T08:00:00Z",
+      "workplace_type": "remote",
+      "skills": ["python", "statistics", "causal inference"],
+      "emails": [],
+      "application_urls": ["https://boards.greenhouse.io/harbor/sample-ds-2"]
+    }
+  ],
+  "posts": [
+    {
+      "post_id": "sample-post-1",
+      "author": "Priya Nair",
+      "content": "Hiring Data Scientists with strong python and SQL. Email careers@harbor.example",
+      "url": "https://www.linkedin.com/feed/update/sample-post-1",
+      "emails": ["careers@harbor.example"],
+      "posted_at": "2026-10-02T10:00:00Z"
+    }
+  ]
+}

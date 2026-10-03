@@ -56,6 +56,18 @@ export const endpoints = {
       "/discovery/demo1-refresh",
       { method: "POST", body: JSON.stringify(body) },
     ),
+  linkedinMasterIngest: (body: unknown = {}) =>
+    api<{
+      status: string;
+      jobs_upserted: number;
+      posts_upserted: number;
+      inbox_matches_created: number;
+      by_keyword: Record<string, number>;
+      export_dir: string;
+    }>("/discovery/linkedin-master-ingest", { method: "POST", body: JSON.stringify(body) }),
+  matchShared: (body: unknown = {}) =>
+    api<{ status: string; inbox_matches_created: number }>("/discovery/match-shared", { method: "POST", body: JSON.stringify(body) }),
+  sharedJobs: () => api<{ items: { id: string; title: string; company: string; source_connector: string }[] }>("/discovery/shared-jobs"),
   importCandidateCapture: (body: unknown) => api<{ scan_job_id: string; status: string; jobs: number; posts: number }>("/discovery/candidate-imports", { method: "POST", body: JSON.stringify(body) }),
   savedSearches: () => api<{ saved_searches: SavedSearch[] }>("/discovery/saved-searches"),
   connectSource: (connectorId: string, body: unknown) =>

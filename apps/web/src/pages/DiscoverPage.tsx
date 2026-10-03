@@ -70,6 +70,60 @@ export function DiscoverPage() {
       </p>
       {error ? <ErrorNote message={error} /> : null}
 
+      <Card title="LinkedIn scraper → master index">
+        <p className="mb-3 text-sm text-slate-500">
+          Drop your scraper JSON / clean CSV under <code className="text-xs">data/linkedin-exports/&lt;role&gt;/</code>
+          (see README there). Ingest keeps the latest <strong>100 jobs per keyword</strong> and <strong>10–15 feed posts</strong>
+          matched to your skills, stores them in the shared master DB, then ranks into Inbox.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            className="rounded-md bg-indigo-700 px-4 py-2 text-white disabled:opacity-50"
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              try {
+                const res = await endpoints.linkedinMasterIngest({
+                  jobs_per_keyword: 100,
+                  posts_limit: 15,
+                  match_into_inbox: true,
+                });
+                setStatus(
+                  `Master index: ${res.jobs_upserted} jobs + ${res.posts_upserted} posts from ${res.export_dir}. Inbox matches: ${res.inbox_matches_created}.`,
+                );
+              } catch (err) {
+                setError(String(err));
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Ingest LinkedIn exports to master DB
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            className="rounded-md border px-4 py-2 text-sm disabled:opacity-50"
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              try {
+                const res = await endpoints.matchShared({ limit: 80 });
+                setStatus(`Re-matched shared catalogue → ${res.inbox_matches_created} inbox items.`);
+              } catch (err) {
+                setError(String(err));
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Re-match master index to my inbox
+          </button>
+        </div>
+      </Card>
+
       <Card title="Demo 1 — refresh my matches">
         <p className="mb-3 text-sm text-slate-500">
           Queues all three Demo 1 sources and enables daily autopilot. Start the worker after queuing. Fixtures power local demo; live Gmail API stays gated.
