@@ -173,10 +173,34 @@ export function InboxPage() {
               onClick={async () => {
                 const h = await endpoints.handoffApply(active.id);
                 if (h.apply_urls[0]) window.open(h.apply_urls[0], "_blank", "noopener,noreferrer");
-                setMsg("Apply URL opened. Materials are above — you submit on the employer site.");
+                setMsg(
+                  h.application
+                    ? `Apply URL opened · tracked as ${h.application.state}. Materials above — you submit. Review Applications to update outcome.`
+                    : "Apply URL opened. Materials are above — you submit on the employer site.",
+                );
+                load();
               }}
             >
               Open external apply (handoff)
+            </button>
+          ) : null}
+
+          {active.state !== "applied" && active.state !== "ready_to_apply" ? (
+            <button
+              type="button"
+              className="mt-4 rounded-md border px-3 py-1 text-sm dark:border-slate-700"
+              onClick={async () => {
+                const url = (active.extracted_apply_urls || [])[0] || active.apply_url || active.source_url;
+                if (url) window.open(url, "_blank", "noopener,noreferrer");
+                await endpoints.createApplication({
+                  inbox_item_id: active.id,
+                  apply_url: url,
+                  notes: "manual_free_path",
+                });
+                setMsg("Tracked under Applications (started). You submit — we never auto-send.");
+              }}
+            >
+              Open listing & track application
             </button>
           ) : null}
           {msg ? <p className="mt-2 text-sm text-slate-500">{msg}</p> : null}

@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from jobhunt_api.redact import redact
 from jobhunt_api.routers import (
     agents,
+    applications,
     approvals,
     dashboard,
     deploy,
@@ -76,6 +77,7 @@ app.include_router(agents.router, prefix=prefix)
 app.include_router(notifications.router, prefix=prefix)
 app.include_router(outreach.router, prefix=prefix)
 app.include_router(dashboard.router, prefix=prefix)
+app.include_router(applications.router, prefix=prefix)
 app.include_router(deploy.router, prefix=prefix)
 app.include_router(stubs.router, prefix=prefix)
 app.include_router(uat.router, prefix=prefix)

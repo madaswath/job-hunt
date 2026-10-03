@@ -291,22 +291,45 @@ def load_export_path(path: Path, *, default_keyword: str | None = None) -> dict[
         keyword = keyword or kw
     elif path.is_dir():
         keyword = keyword or path.name
-        matched_named = False
-        for name in JOB_FILE_NAMES + POST_FILE_NAMES:
+        # Prefer a full results/jobs JSON bundle so CSV siblings do not double-count.
+        primary_json = None
+        for name in ("results.json", "jobs.json", "jobs.clean.json", "linkedin_jobs.json"):
             candidate = path / name
             if candidate.exists():
-                matched_named = True
-                j, p, kw = _rows_from_file(candidate)
-                jobs_raw.extend(j)
-                posts_raw.extend(p)
-                keyword = keyword or kw
-        if not matched_named:
-            for child in sorted(path.iterdir()):
-                if child.is_file() and child.suffix.lower() in {".json", ".csv"}:
-                    j, p, kw = _rows_from_file(child)
+                primary_json = candidate
+                break
+        if primary_json is not None:
+            j, p, kw = _rows_from_file(primary_json)
+            jobs_raw.extend(j)
+            posts_raw.extend(p)
+            keyword = keyword or kw
+            # Optional dedicated posts file only if the primary JSON had none.
+            if not posts_raw:
+                for name in POST_FILE_NAMES:
+                    candidate = path / name
+                    if candidate.exists():
+                        _, p2, kw2 = _rows_from_file(candidate)
+                        posts_raw.extend(p2)
+                        keyword = keyword or kw2
+                        if posts_raw:
+                            break
+        else:
+            matched_named = False
+            for name in JOB_FILE_NAMES + POST_FILE_NAMES:
+                candidate = path / name
+                if candidate.exists():
+                    matched_named = True
+                    j, p, kw = _rows_from_file(candidate)
                     jobs_raw.extend(j)
                     posts_raw.extend(p)
                     keyword = keyword or kw
+            if not matched_named:
+                for child in sorted(path.iterdir()):
+                    if child.is_file() and child.suffix.lower() in {".json", ".csv"}:
+                        j, p, kw = _rows_from_file(child)
+                        jobs_raw.extend(j)
+                        posts_raw.extend(p)
+                        keyword = keyword or kw
     else:
         raise FileNotFoundError(str(path))
 
@@ -371,8 +394,19 @@ def select_recent_jobs(jobs: list[dict[str, Any]], *, limit: int = 100) -> list[
         posted = job.get("posted_at") or ""
         return str(posted)
 
+    def dedupe_key(job: dict[str, Any]) -> str:
+        return str(job.get("job_id") or job.get("url") or job.get("title") or id(job))
+
     ordered = sorted(jobs, key=sort_key, reverse=True)
-    return ordered[: max(0, limit)]
+    seen: set[str] = set()
+    unique: list[dict[str, Any]] = []
+    for job in ordered:
+        key = dedupe_key(job)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(job)
+    return unique[: max(0, limit)]
 
 
 def select_feed_posts(
@@ -384,7 +418,12 @@ def select_feed_posts(
 ) -> list[dict[str, Any]]:
     needles = [s.casefold() for s in (skills or []) + (preferences or []) if s and str(s).strip()]
     scored: list[tuple[int, dict[str, Any]]] = []
+    seen: set[str] = set()
     for post in posts:
+        key = str(post.get("post_id") or post.get("url") or (post.get("content") or "")[:80])
+        if key in seen:
+            continue
+        seen.add(key)
         blob = f"{post.get('title') or ''} {post.get('content') or ''} {post.get('company') or ''}".casefold()
         score = sum(1 for n in needles if n in blob) if needles else 1
         if needles and score == 0:

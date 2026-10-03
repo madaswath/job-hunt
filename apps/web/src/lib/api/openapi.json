@@ -827,6 +827,183 @@
         }
       }
     },
+    "/api/v1/discovery/demo1-refresh": {
+      "post": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Demo1 Refresh",
+        "description": "Queue Gmail + LinkedIn + ATS fixture ingest for Demo 1 autopilot.",
+        "operationId": "demo1_refresh_api_v1_discovery_demo1_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Demo1RefreshIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Demo1 Refresh Api V1 Discovery Demo1 Refresh Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/discovery/linkedin-master-ingest": {
+      "post": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Linkedin Master Ingest",
+        "description": "Load scraper JSON/CSV drops into shared_jobs master index (100 jobs/keyword, 10\u201315 posts).",
+        "operationId": "linkedin_master_ingest_api_v1_discovery_linkedin_master_ingest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkedInMasterIngestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Linkedin Master Ingest Api V1 Discovery Linkedin Master Ingest Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/discovery/match-shared": {
+      "post": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "Match Shared",
+        "description": "Re-rank shared master catalogue into this user's Review Inbox.",
+        "operationId": "match_shared_api_v1_discovery_match_shared_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchSharedIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Match Shared Api V1 Discovery Match Shared Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/discovery/shared-jobs": {
+      "get": {
+        "tags": [
+          "discovery"
+        ],
+        "summary": "List Shared",
+        "operationId": "list_shared_api_v1_discovery_shared_jobs_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response List Shared Api V1 Discovery Shared Jobs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/discovery/candidate-imports": {
       "post": {
         "tags": [
@@ -1426,6 +1603,167 @@
         }
       }
     },
+    "/api/v1/applications": {
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "List Applications",
+        "operationId": "list_applications_api_v1_applications_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response List Applications Api V1 Applications Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Create Application",
+        "description": "Track an application started from an inbox item (manual Free path or post-handoff).",
+        "operationId": "create_application_api_v1_applications_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Create Application Api V1 Applications Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/applications/{application_id}": {
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Get Application",
+        "operationId": "get_application_api_v1_applications__application_id__get",
+        "parameters": [
+          {
+            "name": "application_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Application Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Application Api V1 Applications  Application Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Patch Application",
+        "operationId": "patch_application_api_v1_applications__application_id__patch",
+        "parameters": [
+          {
+            "name": "application_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Application Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationPatchIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Patch Application Api V1 Applications  Application Id  Patch"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/deploy/external-gmail-readiness": {
       "get": {
         "tags": [
@@ -1443,22 +1781,6 @@
                   "type": "object",
                   "title": "Response External Gmail Readiness Api V1 Deploy External Gmail Readiness Get"
                 }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/applications": {
-      "get": {
-        "summary": "Applications",
-        "operationId": "applications_api_v1_applications_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
               }
             }
           }
@@ -1641,6 +1963,71 @@
   },
   "components": {
     "schemas": {
+      "ApplicationCreateIn": {
+        "properties": {
+          "inbox_item_id": {
+            "type": "string",
+            "title": "Inbox Item Id"
+          },
+          "apply_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Apply Url"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "mark_inbox_applied": {
+            "type": "boolean",
+            "title": "Mark Inbox Applied",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "inbox_item_id"
+        ],
+        "title": "ApplicationCreateIn"
+      },
+      "ApplicationPatchIn": {
+        "properties": {
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "started | applied | interview | offer | rejected | withdrawn"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "state"
+        ],
+        "title": "ApplicationPatchIn"
+      },
       "BrowserCaptureIn": {
         "properties": {
           "source_url": {
@@ -2017,6 +2404,50 @@
         },
         "type": "object",
         "title": "DeleteConfirm"
+      },
+      "Demo1RefreshIn": {
+        "properties": {
+          "titles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Titles"
+          },
+          "cities": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cities"
+          },
+          "work_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Work Mode",
+            "default": "hybrid"
+          },
+          "enable_autopilot": {
+            "type": "boolean",
+            "title": "Enable Autopilot",
+            "default": true
+          },
+          "interval_hours": {
+            "type": "integer",
+            "maximum": 168.0,
+            "minimum": 6.0,
+            "title": "Interval Hours",
+            "default": 24
+          }
+        },
+        "type": "object",
+        "title": "Demo1RefreshIn"
       },
       "DevTokenIn": {
         "properties": {
@@ -2452,6 +2883,63 @@
         ],
         "title": "JobPosting"
       },
+      "LinkedInMasterIngestIn": {
+        "properties": {
+          "export_dir": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Export Dir"
+          },
+          "keywords": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Keywords"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "preferences": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Preferences"
+          },
+          "jobs_per_keyword": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Jobs Per Keyword",
+            "default": 100
+          },
+          "posts_limit": {
+            "type": "integer",
+            "maximum": 15.0,
+            "minimum": 10.0,
+            "title": "Posts Limit",
+            "default": 15
+          },
+          "match_into_inbox": {
+            "type": "boolean",
+            "title": "Match Into Inbox",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "LinkedInMasterIngestIn"
+      },
       "MatchPreviewIn": {
         "properties": {
           "job": {
@@ -2467,6 +2955,19 @@
           "profile"
         ],
         "title": "MatchPreviewIn"
+      },
+      "MatchSharedIn": {
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "maximum": 300.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "default": 80
+          }
+        },
+        "type": "object",
+        "title": "MatchSharedIn"
       },
       "PrefsIn": {
         "properties": {

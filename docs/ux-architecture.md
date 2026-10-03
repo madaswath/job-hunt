@@ -14,7 +14,7 @@ Sign in
   → Ready to apply
        ├─ ATS / career / Workday → Open apply URL + materials pack (candidate submits)
        └─ Recruiter email → Draft subject/body + resume (candidate sends)
-  → Applications (track outcome)  [planned surface]
+  → Applications (track outcome)  [live minimal]
 ```
 
 Free users stop at browse/rank/manual apply. Pro unlocks high-match emphasis, recruiter intel, and prepare/draft agents — still human-approved.
@@ -30,7 +30,7 @@ Free users stop at browse/rank/manual apply. Pro unlocks high-match emphasis, re
 | `/discover` | Search + queue scans | Active discovery / Demo 1 refresh | Live (fixture-heavy) |
 | `/inbox` | Review Inbox | Ranked evidence + actions → apply | Live (core) |
 | `/documents` | Tailored drafts | Inspect CV/cover/answers | Live |
-| `/applications` | Tracker | Post-apply stages | **Planned stub** |
+| `/applications` | Tracker | Post-apply stages | **Live (minimal)** — handoff creates `started`; candidate advances stages |
 | `/agents` | Agent runs | Ops transparency | Live (debug-leaning) |
 | `/analytics` | Funnel | Learning | Planned |
 
@@ -67,7 +67,8 @@ Free users stop at browse/rank/manual apply. Pro unlocks high-match emphasis, re
 - **Gap:** Handoff does not yet attach a visible materials checklist in the new tab context (clipboard/download). Demo 1 should show pack on-screen before open. Email path: Krishna draft API exists; Inbox needs a “Draft recruiter email” button when emails are present.
 
 ### 8. Applications
-- **Missing:** After handoff, nowhere to mark Applied / Interview. Dashboard “by stage” is placeholder. Required before closed beta metrics for “applications started.”
+- **Works:** Handoff from Inbox creates a tracked row (`started`); Free path can “Open listing & track”; Dashboard shows counts by stage; candidate marks Applied / Interview / Offer / Rejected / Withdrawn.
+- **Gap:** Follow-up reminders and interview session linking remain thin for closed beta polish.
 
 ## Information architecture recommendation (Demo 1)
 

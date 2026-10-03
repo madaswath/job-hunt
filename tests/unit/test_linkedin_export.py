@@ -35,10 +35,11 @@ def test_linkedin_export_json_and_csv_caps():
     bundles = load_export_tree(root)
     assert bundles
     ds = next(b for b in bundles if (b.get("metadata") or {}).get("keyword") == "Data Scientist")
-    assert len(ds["jobs"]) >= 2
-    assert len(ds["posts"]) >= 1
+    assert len(ds["jobs"]) >= 5
+    assert len(ds["posts"]) >= 2
     jobs = select_recent_jobs(ds["jobs"] * 60, limit=100)
-    assert len(jobs) == 100
+    assert len(jobs) == len({j.get("job_id") or j.get("url") for j in ds["jobs"]})
+    assert len(jobs) <= 100
     posts = select_feed_posts(
         ds["posts"] + [{"content": "unrelated cooking recipe", "url": "https://example.com/x"}],
         skills=["python", "sql"],
@@ -71,7 +72,9 @@ def test_linkedin_connector_reads_export_dir():
 
 
 def test_load_single_bundle_path():
-    path = Path(__file__).resolve().parents[2] / "data" / "linkedin-exports" / "Data Scientist" / "jobs.json"
+    path = Path(__file__).resolve().parents[2] / "data" / "linkedin-exports" / "Data Scientist" / "results.json"
     bundle = load_export_path(path)
     assert bundle["jobs"][0]["title"]
     assert bundle["metadata"]["keyword"] == "Data Scientist"
+    assert len(bundle["jobs"]) >= 5
+    assert all("email_draft" not in p for p in bundle["posts"])

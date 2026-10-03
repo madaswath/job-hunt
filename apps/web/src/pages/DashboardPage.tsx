@@ -43,7 +43,23 @@ export function DashboardPage() {
             <ul className="text-sm">{data.scan_health.map((s) => <li key={s.id}>{s.status}{s.last_error ? ` — ${s.last_error}` : ""}</li>)}</ul>
           )}
         </Card>
-        <Card title="Applications by stage"><p className="text-sm text-slate-500">Tracker planned — mark Applied after handoff for now via notes in beta.</p></Card>
+        <Card title="Applications by stage" action={<Link className="text-sm text-amber-700" to="/applications">Tracker</Link>}>
+          {Object.values(data.applications_by_stage || {}).every((n) => !n) ? (
+            <p className="text-sm text-slate-500">
+              No applications started yet. After handoff from Inbox, outcomes show here.
+            </p>
+          ) : (
+            <ul className="space-y-1 text-sm">
+              {Object.entries(data.applications_by_stage)
+                .filter(([, n]) => n > 0)
+                .map(([state, n]) => (
+                  <li key={state}>
+                    {state.replace(/_/g, " ")}: {n}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </Card>
         <Card title="Follow-ups"><p className="text-sm text-slate-500">No upcoming follow-ups.</p></Card>
         <Card title="Interview reminders"><p className="text-sm text-slate-500">No interviews recorded.</p></Card>
         <Card title="Connector health">

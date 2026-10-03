@@ -49,7 +49,18 @@ export const endpoints = {
   approvals: () => api<{ approvals: Approval[]; pending: Approval[] }>("/approvals"),
   decideApproval: (taskId: string, decision: "approved" | "denied") =>
     api<Record<string, unknown>>(`/approvals/${taskId}/decide`, { method: "POST", body: JSON.stringify({ decision }) }),
-  handoffApply: (inboxId: string) => api<{ apply_urls: string[] }>(`/inbox/${inboxId}/handoff`, { method: "POST" }),
+  handoffApply: (inboxId: string) =>
+    api<{ apply_urls: string[]; application?: ApplicationItem; hint?: string }>(`/inbox/${inboxId}/handoff`, {
+      method: "POST",
+    }),
+  applications: () =>
+    api<{ status: string; items: ApplicationItem[]; by_stage: Record<string, number>; states: string[] }>(
+      "/applications",
+    ),
+  createApplication: (body: { inbox_item_id: string; apply_url?: string; notes?: string; mark_inbox_applied?: boolean }) =>
+    api<{ item: ApplicationItem }>("/applications", { method: "POST", body: JSON.stringify(body) }),
+  patchApplication: (id: string, body: { state: string; notes?: string }) =>
+    api<{ item: ApplicationItem }>(`/applications/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   queueScan: (body: unknown) => api<{ scan_job_id: string; status: string }>("/discovery/scans", { method: "POST", body: JSON.stringify(body) }),
   demo1Refresh: (body: unknown = {}) =>
     api<{ status: string; scans: { scan_job_id: string; connector_id: string; status: string }[]; hint: string }>(
@@ -141,6 +152,20 @@ export type Source = {
   policy?: { retention_days?: number; max_requests_per_hour?: number; terms_summary?: string };
   health: { status: string; last_ingest_at?: string; account_status?: string };
   account?: { status: string; consent_at?: string; revoked_at?: string };
+};
+export type ApplicationItem = {
+  id: string;
+  inbox_item_id: string | null;
+  state: string;
+  apply_url?: string | null;
+  notes?: string | null;
+  title?: string | null;
+  company?: string | null;
+  location?: string | null;
+  source_url?: string | null;
+  overall_score?: number | null;
+  created_at?: string;
+  updated_at?: string;
 };
 export type OutreachDraft = { id: string; inbox_item_id: string; channel: string; body: string; status: string };
 export type Agent = { name: string; role: string; status: string };

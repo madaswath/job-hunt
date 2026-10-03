@@ -14,13 +14,14 @@ North star for what to build next: [locked-intent.md](locked-intent.md).
 4. Beta title allowlist (DS+AI set in locked-intent) + remote/hybrid + India-primary with abroad listed.
 5. Autopilot: scheduled refresh job that re-ingests enabled sources and rematches.
 6. `POST /discovery/linkedin-master-ingest` + `scripts/ingest_linkedin_export.py` for master-data load; `POST /discovery/match-shared` to rank master catalogue into inbox.
+7. Applications tracker (minimal): handoff → `applications.started`; candidate updates stage; dashboard `applications_by_stage`.
 
 **Acceptance:**
 
 - One test user sees ranked inbox items from **all three** source families in a single demo run.
 - Hard filters drop obvious non-DS+AI noise; score breakdown visible.
 - No auto-submit / auto-send.
-- Metrics hooks (or manual tally) for opens, saves/interested, apply-started.
+- Metrics hooks (or manual tally) for opens, saves/interested, apply-started (applications table).
 
 **Out of scope for Demo 1:** Pro paywall enforcement, interview agents, follow-up bots, portal partnerships, LLM-heavy research.
 

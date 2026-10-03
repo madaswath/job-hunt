@@ -113,6 +113,8 @@ def act(item_id: str, body: InboxAction, user: dict = Depends(current_user)) -> 
 
 @router.post("/inbox/{item_id}/handoff")
 def handoff_apply(item_id: str, user: dict = Depends(current_user)) -> dict:
+    from jobhunt_api.services import applications as app_svc
+
     row = db.fetch_one(
         """
         SELECT i.state, c.extracted_apply_urls, j.apply_url, c.source_url
@@ -132,5 +134,23 @@ def handoff_apply(item_id: str, user: dict = Depends(current_user)) -> dict:
         urls.insert(0, row["apply_url"])
     if not urls and row.get("source_url"):
         urls = [row["source_url"]]
-    audit.record(user["user_id"], "external_apply_opened", "inbox_item", item_id, {"urls": urls})
-    return {"apply_urls": urls, "handoff": "open_in_browser_only"}
+    application = app_svc.create_or_get_from_inbox(
+        user["user_id"],
+        item_id,
+        apply_url=urls[0] if urls else None,
+        notes="external_apply_handoff",
+        mark_inbox_applied=True,
+    )
+    audit.record(
+        user["user_id"],
+        "external_apply_opened",
+        "inbox_item",
+        item_id,
+        {"urls": urls, "application_id": application["id"]},
+    )
+    return {
+        "apply_urls": urls,
+        "handoff": "open_in_browser_only",
+        "application": application,
+        "hint": "You submit on the employer site. Track outcome under Applications.",
+    }
