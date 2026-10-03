@@ -1,12 +1,12 @@
 from pathlib import Path
 
+from jobhunt_connectors.catalog import get_connector
 from jobhunt_connectors.linkedin_export import (
     load_export_path,
     load_export_tree,
     select_feed_posts,
     select_recent_jobs,
 )
-from jobhunt_connectors.catalog import get_connector
 from jobhunt_policy.rules import assert_connector_operation
 
 

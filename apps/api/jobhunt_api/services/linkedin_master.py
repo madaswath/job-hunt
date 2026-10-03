@@ -9,7 +9,6 @@ from pathlib import Path
 
 from jobhunt_connectors.catalog import get_connector
 from jobhunt_connectors.contract import RawCapture
-from jobhunt_connectors.normalize import normalize_capture
 from jobhunt_domain.matching import score_match_v2
 from jobhunt_domain.schemas import JobPosting
 

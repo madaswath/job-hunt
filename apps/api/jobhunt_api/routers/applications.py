@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
+from jobhunt_domain.application_states import APPLICATION_STATES
 from pydantic import BaseModel, Field
 
-from jobhunt_domain.application_states import APPLICATION_STATES
 from jobhunt_api.auth import current_user
 from jobhunt_api.services import applications as app_svc
 
