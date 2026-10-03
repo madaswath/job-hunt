@@ -1,5 +1,30 @@
 # Implementation plan
 
+North star for what to build next: [locked-intent.md](locked-intent.md).
+
+## Demo 1 — Gmail + LinkedIn + ATS → ranked inbox (NEXT)
+
+**Goal:** Local demo for one DS+AI switcher profile, then closed beta (~10–20).
+
+**Build:**
+
+1. Gmail alerts ingest → follow JD links → normalize → Match v2 → inbox (fixture path acceptable in CI; real OAuth for local demo).
+2. LinkedIn ingest into a **shared jobs index** via scraper export drops (`data/linkedin-exports/`, JSON + clean CSV): **100 recent jobs per role keyword**, **10–15 feed posts** matched to skills/preferences; fixture fallback when the drop folder is empty. Unrestricted live scrape remains forbidden.
+3. Public ATS into the same shared index (`FEATURE_LIVE_ATS_HTTP` or expanded fixtures for demo).
+4. Beta title allowlist (DS+AI set in locked-intent) + remote/hybrid + India-primary with abroad listed.
+5. Autopilot: scheduled refresh job that re-ingests enabled sources and rematches.
+6. `POST /discovery/linkedin-master-ingest` + `scripts/ingest_linkedin_export.py` for master-data load; `POST /discovery/match-shared` to rank master catalogue into inbox.
+7. Applications tracker (minimal): handoff → `applications.started`; candidate updates stage; dashboard `applications_by_stage`.
+
+**Acceptance:**
+
+- One test user sees ranked inbox items from **all three** source families in a single demo run.
+- Hard filters drop obvious non-DS+AI noise; score breakdown visible.
+- No auto-submit / auto-send.
+- Metrics hooks (or manual tally) for opens, saves/interested, apply-started (applications table).
+
+**Out of scope for Demo 1:** Pro paywall enforcement, interview agents, follow-up bots, portal partnerships, LLM-heavy research.
+
 ## Phase 1 — scaffold, profile, fixture ATS, Match v2, inbox
 
 **Build:** repository, Clerk, Supabase schema/RLS, FastAPI, React shell, profile, public ATS fixtures, deterministic matching, inbox, worker leases, audit/outbox tables.

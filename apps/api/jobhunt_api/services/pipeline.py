@@ -14,6 +14,7 @@ from jobhunt_api.services import sources as source_svc
 from jobhunt_api.services.inbox_transitions import transition_inbox
 from jobhunt_api.services.profile_loader import load_candidate_profile
 from jobhunt_api.services.rematch import rematch_user_captures
+from jobhunt_api.services.shared_jobs import upsert_shared_job
 from jobhunt_api.settings import settings
 
 
@@ -59,7 +60,7 @@ def process_scan_job(job_row: dict) -> dict:
     for raw in raws:
         created += int(_ingest_one(user_id, connector, raw, profile))
     agents.finish_run(user_id, narada_run, {"ingested": len(raws), "created": created}, started=started)
-    if connector_id in {"gmail_alerts", "browser_capture", "candidate_import", "public_ats_fixture"}:
+    if connector_id in {"gmail_alerts", "browser_capture", "candidate_import", "public_ats_fixture", "linkedin"}:
         source_svc.mark_ingest_complete(user_id, connector_id, {"ingested": len(raws), "created": created})
     _enqueue_outbox(
         user_id,
@@ -77,6 +78,11 @@ def _ingest_one(user_id: str, connector, raw: RawCapture, profile: CandidateProf
 
 def _ingest_one_tx(user_id: str, connector, raw: RawCapture, profile: CandidateProfile) -> bool:
     normalized = connector.normalize(raw)
+    try:
+        upsert_shared_job(raw, normalized, search_keyword=(raw.raw or {}).get("keyword") if isinstance(raw.raw, dict) else None, posted_at=raw.posted_at)
+    except Exception:
+        # Shared index is additive; per-user ingest must not fail if migration 006/007 is absent in older DBs.
+        pass
     existing = db.fetch_one(
         """
         SELECT id FROM source_captures

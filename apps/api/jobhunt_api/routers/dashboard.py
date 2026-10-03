@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from jobhunt_api import db
 from jobhunt_api.auth import current_user
+from jobhunt_api.services import applications as app_svc
 from jobhunt_api.services.connector_health import connector_dashboard
 
 router = APIRouter(tags=["dashboard"])
@@ -34,7 +35,7 @@ def dashboard(user: dict = Depends(current_user)) -> dict:
         "pending_approvals": pending["n"] if pending else 0,
         "scan_health": scans,
         "connector_health": connectors,
-        "applications_by_stage": {},
+        "applications_by_stage": app_svc.counts_by_stage(uid),
         "upcoming_follow_ups": [],
         "interview_reminders": [],
         "source_freshness": freshness,

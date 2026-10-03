@@ -18,6 +18,8 @@ services:
       - ../../supabase/migrations/003_operations_hardening.sql:/docker-entrypoint-initdb.d/003.sql:ro
       - ../../supabase/migrations/004_production_gates.sql:/docker-entrypoint-initdb.d/004.sql:ro
       - ../../supabase/migrations/005_uat_signoff_controls.sql:/docker-entrypoint-initdb.d/005.sql:ro
+      - ../../supabase/migrations/006_shared_jobs_index.sql:/docker-entrypoint-initdb.d/006.sql:ro
+      - ../../supabase/migrations/007_linkedin_master_index.sql:/docker-entrypoint-initdb.d/007.sql:ro
 
   api:
     build:
@@ -26,6 +28,7 @@ services:
     env_file:
       - .env.uat.example
     environment:
+      ENVIRONMENT: local
       DATABASE_URL: postgresql://jobhunt:jobhunt@postgres:5432/jobhunt
       AUTH_MODE: test
     depends_on:
@@ -45,6 +48,7 @@ services:
     env_file:
       - .env.uat.example
     environment:
+      ENVIRONMENT: local
       DATABASE_URL: postgresql://jobhunt:jobhunt@postgres:5432/jobhunt
       AUTH_MODE: test
     depends_on:

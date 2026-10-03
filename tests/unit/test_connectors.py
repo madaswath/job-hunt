@@ -17,6 +17,19 @@ def test_fixture_ingest_and_policy():
     assert_connector_operation("public_ats_fixture", "ingest")
 
 
+def test_linkedin_demo1_fixture_ingest():
+    conn = get_connector("linkedin")
+    assert conn.status == "ingestion_ready"
+    assert_connector_operation("linkedin", "ingest")
+    path = Path(__file__).resolve().parents[1] / "fixtures" / "linkedin" / "postings.json"
+    items = conn.ingest({}, {"fixture_path": str(path)})
+    assert len(items) >= 3
+    assert all(item.connector_id == "linkedin" for item in items)
+    assert items[0].capture_method == "linkedin_recorded_scrape"
+    with pytest.raises(PermissionError):
+        conn.ingest({}, {"fixture_path": str(path), "mode": "unrestricted_scrape"})
+
+
 def test_catalog_not_live():
     conn = get_connector("naukri")
     assert conn.status == "catalog"

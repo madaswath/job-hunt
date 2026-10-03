@@ -76,5 +76,31 @@
     "ctc_inr_annual_max": 4500000,
     "company_type": "startup",
     "source_trusted": true
+  },
+  {
+    "connector_id": "public_ats_fixture",
+    "capture_kind": "job_listing",
+    "external_id": "gh-1003",
+    "source_url": "https://boards.greenhouse.io/example/jobs/1003",
+    "company": "Cascade Data",
+    "title": "Data Scientist",
+    "location": "Bengaluru",
+    "excerpt": "Causal inference and forecasting for India marketplace.",
+    "description": "Data Scientist with Python, SQL, experimentation. Hybrid Bengaluru. Full-time.",
+    "extracted_emails": [],
+    "extracted_apply_urls": ["https://boards.greenhouse.io/example/jobs/1003"],
+    "capture_method": "fixture",
+    "posted_at": "2026-09-27T00:00:00Z",
+    "skills": ["python", "sql", "experimentation", "statistics"],
+    "must_have_skills": ["python", "sql"],
+    "adjacent_skills": ["spark"],
+    "work_mode": "hybrid",
+    "employment_type": "full-time",
+    "seniority": "mid",
+    "ctc_inr_annual_min": 2600000,
+    "ctc_inr_annual_max": 4000000,
+    "notice_period_days": 60,
+    "company_type": "startup",
+    "source_trusted": true
   }
 ]

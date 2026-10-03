@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { endpoints, type SavedSearch } from "../lib/api/client";
 import { Card, ErrorNote } from "../ui/States";
 
 const CITIES = ["Bengaluru", "Hyderabad", "Pune", "Chennai", "Mumbai", "Gurugram", "Noida", "Ahmedabad", "Kolkata", "remote"];
+const DEFAULT_TITLES = "Data Scientist, GenAI Engineer, Machine Learning Engineer";
 const UNSAFE_IMPORT_KEYS = ["cookie", "session", "password", "authorization", "bearer", "email_draft", "generated_email"];
 
 function removeUnsafeImportFields(value: unknown): { value: unknown; removed: boolean } {
@@ -28,21 +30,121 @@ function removeUnsafeImportFields(value: unknown): { value: unknown; removed: bo
 }
 
 export function DiscoverPage() {
-  const [titles, setTitles] = useState("GenAI Engineer");
+  const [titles, setTitles] = useState(DEFAULT_TITLES);
   const [city, setCity] = useState("Bengaluru");
   const [mode, setMode] = useState("hybrid");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [saved, setSaved] = useState<SavedSearch[]>([]);
   const [importStatus, setImportStatus] = useState("");
+  const [busy, setBusy] = useState(false);
   useEffect(() => {
     endpoints.savedSearches().then((r) => setSaved(r.saved_searches)).catch(() => undefined);
   }, []);
+
+  async function runDemo1() {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await endpoints.demo1Refresh({
+        cities: [city, "remote"],
+        work_mode: mode,
+        enable_autopilot: true,
+      });
+      setStatus(
+        `Demo 1 queued ${res.scans.length} scans (${res.scans.map((s) => s.connector_id).join(", ")}). ${res.hint}`,
+      );
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">Discover</h1>
+      <p className="text-sm text-slate-500">
+        Demo 1 spine: one refresh pulls <strong>Gmail alerts</strong>, <strong>LinkedIn</strong> recorded listings, and <strong>public ATS</strong> into a shared index, then ranks into{" "}
+        <Link className="underline" to="/inbox">Review Inbox</Link>.
+      </p>
       {error ? <ErrorNote message={error} /> : null}
-      <Card title="Search and queue fixture scan">
+
+      <Card title="LinkedIn scraper → master index">
+        <p className="mb-3 text-sm text-slate-500">
+          Run <code className="text-xs">scripts/linkedin_browserless_scraper.py</code> or the batch runner, then ingest here.
+          Expects <code className="text-xs">results.json</code> / <code className="text-xs">jobs_clean.csv</code> /
+          <code className="text-xs">recruiter_posts_drafts.csv</code> under <code className="text-xs">data/linkedin-exports/&lt;role&gt;/</code>.
+          Keeps the latest <strong>100 jobs per keyword</strong> and <strong>10–15 hiring posts</strong>, stores them in the shared master DB,
+          strips scraper email drafts, then ranks into Inbox.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            className="rounded-md bg-indigo-700 px-4 py-2 text-white disabled:opacity-50"
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              try {
+                const res = await endpoints.linkedinMasterIngest({
+                  jobs_per_keyword: 100,
+                  posts_limit: 15,
+                  match_into_inbox: true,
+                });
+                setStatus(
+                  `Master index: ${res.jobs_upserted} jobs + ${res.posts_upserted} posts from ${res.export_dir}. Inbox matches: ${res.inbox_matches_created}.`,
+                );
+              } catch (err) {
+                setError(String(err));
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Ingest LinkedIn exports to master DB
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            className="rounded-md border px-4 py-2 text-sm disabled:opacity-50"
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              try {
+                const res = await endpoints.matchShared({ limit: 80 });
+                setStatus(`Re-matched shared catalogue → ${res.inbox_matches_created} inbox items.`);
+              } catch (err) {
+                setError(String(err));
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Re-match master index to my inbox
+          </button>
+        </div>
+      </Card>
+
+      <Card title="Demo 1 — refresh my matches">
+        <p className="mb-3 text-sm text-slate-500">
+          Queues all three Demo 1 sources and enables daily autopilot. Start the worker after queuing. Fixtures power local demo; live Gmail API stays gated.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={busy}
+            className="rounded-md bg-amber-700 px-4 py-2 text-white disabled:opacity-50"
+            onClick={runDemo1}
+          >
+            {busy ? "Queuing…" : "Refresh Gmail + LinkedIn + ATS"}
+          </button>
+          <Link className="rounded-md border px-4 py-2 text-sm" to="/inbox">Open inbox</Link>
+        </div>
+        {status ? <p className="mt-2 text-sm text-slate-500">{status}</p> : null}
+      </Card>
+
+      <Card title="Narrow search and queue a single ATS fixture scan">
         <form
           className="grid gap-3 md:grid-cols-2"
           onSubmit={async (e) => {
@@ -65,7 +167,7 @@ export function DiscoverPage() {
           <label className="text-sm">Target titles
             <input className="mt-1 w-full rounded-md border px-3 py-2 dark:border-slate-700 dark:bg-ink-800" value={titles} onChange={(e) => setTitles(e.target.value)} />
           </label>
-          <label className="text-sm">Indian city
+          <label className="text-sm">City (India) or remote
             <select className="mt-1 w-full rounded-md border px-3 py-2 dark:border-slate-700 dark:bg-ink-800" value={city} onChange={(e) => setCity(e.target.value)}>
               {CITIES.map((c) => <option key={c}>{c}</option>)}
             </select>
@@ -77,26 +179,20 @@ export function DiscoverPage() {
               <option>onsite</option>
             </select>
           </label>
-          <label className="text-sm">Experience range
-            <input className="mt-1 w-full rounded-md border px-3 py-2 dark:border-slate-700 dark:bg-ink-800" defaultValue="3-8 years" />
-          </label>
-          <label className="text-sm">CTC range (INR annual)
-            <input className="mt-1 w-full rounded-md border px-3 py-2 dark:border-slate-700 dark:bg-ink-800" defaultValue="2500000-4000000" />
-          </label>
-          <label className="text-sm">Employment type
-            <input className="mt-1 w-full rounded-md border px-3 py-2 dark:border-slate-700 dark:bg-ink-800" defaultValue="full-time" />
-          </label>
           <label className="text-sm">Source
             <input className="mt-1 w-full rounded-md border px-3 py-2 dark:border-slate-700 dark:bg-ink-800" readOnly value="public_ats_fixture (live)" />
           </label>
           <div className="md:col-span-2">
-            <button type="submit" className="rounded-md bg-amber-700 px-4 py-2 text-white">Queue scan</button>
-            {status ? <p className="mt-2 text-sm text-slate-500">{status}</p> : null}
+            <button type="submit" className="rounded-md border border-amber-800 px-4 py-2 text-sm text-amber-900 dark:text-amber-100">Queue ATS-only scan</button>
           </div>
         </form>
       </Card>
+
       <Card title="Import a candidate-captured LinkedIn export">
-        <p className="mb-3 text-sm text-slate-500">Upload the JSON exported by your local browserless tool. It is scored by Narada → Ganesha → Arjuna and appears in Review inbox. The platform never receives browser cookies, scrapes LinkedIn, auto-applies, or sends recruiter email.</p>
+        <p className="mb-3 text-sm text-slate-500">
+          Optional upload of JSON from your local browserless tool. Demo 1 LinkedIn fixture ingest does not need this — use Refresh above.
+          Cookies and generated emails are stripped.
+        </p>
         <label className="block text-sm">Browserless JSON export (up to 100 jobs and 100 hiring posts)
           <input
             className="mt-1 block w-full text-sm"
@@ -131,6 +227,7 @@ export function DiscoverPage() {
         </label>
         {importStatus ? <p className="mt-2 text-sm text-slate-500">{importStatus}</p> : null}
       </Card>
+
       <Card title="Saved searches">
         {saved.length === 0 ? <p className="text-sm text-slate-500">Queue a scan with a name to save it.</p> : (
           <ul className="text-sm">{saved.map((s) => <li key={s.id}>{s.name}</li>)}</ul>

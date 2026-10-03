@@ -1,0 +1,61 @@
+{
+  "metadata": {
+    "engine": "browserless_http",
+    "timestamp": "2026-10-02T01:59:09.483147+00:00",
+    "keyword": "Python Developer",
+    "job_count": 2,
+    "post_count": 1
+  },
+  "jobs": [
+    {
+      "job_id": "4468058393",
+      "title": "Python Developer",
+      "company": "Infosys",
+      "location": "Bengaluru East, Karnataka, India",
+      "url": "https://in.linkedin.com/jobs/view/python-developer-at-infosys-4468058393",
+      "posted_text": "1 week ago",
+      "posted_at": "1 week ago",
+      "workplace_type": "Hybrid / Not Specified",
+      "employment_type": "Employment type Full-time",
+      "about_job": "Primary skills: Python. Design and maintain backend components using Python and Django for web applications and APIs.",
+      "description": "Primary skills: Python. Design and maintain backend components using Python and Django for web applications and APIs.",
+      "applicants": "Over 200 applicants",
+      "application_urls": [
+        "https://in.linkedin.com/jobs/view/python-developer-at-infosys-4468058393"
+      ],
+      "keyword": "Python Developer"
+    },
+    {
+      "job_id": "4461963315",
+      "title": "Python Backend Developer",
+      "company": "Wissen Technology",
+      "location": "Bengaluru, Karnataka, India",
+      "url": "https://in.linkedin.com/jobs/view/python-backend-developer-at-wissen-technology-4461963315",
+      "posted_text": "3 weeks ago",
+      "posted_at": "3 weeks ago",
+      "workplace_type": "Hybrid",
+      "employment_type": "Employment type Full-time",
+      "about_job": "Deliver backend features with Python, FastAPI/Flask, PostgreSQL. Hybrid Bangalore.",
+      "description": "Deliver backend features with Python, FastAPI/Flask, PostgreSQL. Hybrid Bangalore.",
+      "applicants": "Over 200 applicants",
+      "application_urls": [
+        "https://in.linkedin.com/jobs/view/python-backend-developer-at-wissen-technology-4461963315"
+      ],
+      "keyword": "Python Developer"
+    }
+  ],
+  "posts": [
+    {
+      "author": "Roxanne Y.",
+      "headline": "Talent / Hiring Post (urn:li:activity:7511594436552753152)",
+      "posted_time": "44m",
+      "author_profile": "https://hk.linkedin.com/in/roxanne-y-55481311a",
+      "content": "HAPPY FRIDAY!! #HIRING multiple Developers and Python Quant Developers. Email your CV to: r.yaneza@gravitasgroup.com",
+      "url": "https://www.linkedin.com/feed/update/urn:li:activity:7511594436552753152/",
+      "contact_email": "r.yaneza@gravitasgroup.com",
+      "email_subject": "Application: Python Developer Opportunities - (Referencing your LinkedIn Post)",
+      "email_draft": "Hi Roxanne,\n\nI came across your recent LinkedIn post...\n",
+      "keyword": "Python Developer"
+    }
+  ]
+}

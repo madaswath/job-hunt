@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from jobhunt_domain.ctc import normalize_ctc_inr_annual
-from jobhunt_domain.india import INDIA_CITIES, ROLE_ALIASES
+from jobhunt_domain.india import BETA_DS_AI_TITLES, INDIA_CITIES, ROLE_ALIASES
 from pydantic import BaseModel, Field
 
 from jobhunt_api import db
@@ -53,7 +53,12 @@ def get_profile(user: dict = Depends(current_user)) -> dict:
     return {
         "profile": row,
         "verified_facts": facts,
-        "defaults": {"cities": INDIA_CITIES, "role_aliases": ROLE_ALIASES, "fact_kinds": list(FACT_KINDS)},
+        "defaults": {
+            "cities": INDIA_CITIES,
+            "role_aliases": ROLE_ALIASES,
+            "fact_kinds": list(FACT_KINDS),
+            "beta_ds_ai_titles": BETA_DS_AI_TITLES,
+        },
         "feature_us_market": settings.feature_us_market,
     }
 

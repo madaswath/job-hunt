@@ -101,14 +101,23 @@ SOURCE_CAPABILITY_MATRIX: dict[str, SourceCapability] = {
     "linkedin": SourceCapability(
         source_id="linkedin",
         source_class="restricted_portal",
-        acquisition_mode="partner_api_or_user_capture",
-        implementation_status="catalog",
-        refresh="not_scheduled",
-        storage_policy="do not retain credentials; store only necessary captured evidence",
-        allowed_operations=[],
-        forbidden_operations=["ingest", "scrape", "send_email", "submit_application"],
-        capability_label="partner_required",
-        notes="No unrestricted scraping. Talent Job Posting API requires partnership.",
+        acquisition_mode="recorded_scrape_fixture",
+        implementation_status="ingestion_ready",
+        refresh="on_demand_demo1",
+        storage_policy="normalized listing into shared_jobs + per-user captures; no credentials",
+        allowed_operations=["connect", "ingest", "normalize", "revoke", "health"],
+        forbidden_operations=[
+            "send_email",
+            "submit_application",
+            "scrape_authenticated",
+            "unrestricted_scrape",
+            "store_session_cookie",
+        ],
+        capability_label="beta",
+        notes=(
+            "Demo 1: scraper JSON/CSV export drops + fixtures into shared_jobs (FEATURE_LINKEDIN_INGEST). "
+            "Unrestricted live scrape remains forbidden; partnership is the long-term path."
+        ),
     ),
     "indeed": SourceCapability(
         source_id="indeed",
@@ -159,3 +168,14 @@ def assert_acquisition_allowed(source_id: str, acquisition_mode: str) -> None:
         "candidate_initiated",
     }:
         raise PermissionError(f"{source_id} requires partner access or candidate-initiated capture")
+    if (
+        source_id == "linkedin"
+        and cap.implementation_status == "ingestion_ready"
+        and acquisition_mode
+        not in {
+            "recorded_scrape_fixture",
+            "partner_api_or_user_capture",
+            "candidate_initiated",
+        }
+    ):
+        raise PermissionError(f"linkedin Demo 1 only allows recorded fixtures or partner/user-capture modes, not {acquisition_mode}")

@@ -35,11 +35,14 @@ def test_cross_tenant_inbox_denied(client, auth_a, auth_b):
 
 def test_rls_denies_authenticated_role(db_ready, client, auth_a):
     client.get("/api/v1/me", headers=auth_a)
-    admin = os.environ.get("ADMIN_DATABASE_URL", os.environ["DATABASE_URL"].replace("jobhunt:jobhunt", "postgres:postgres"))
+    # CI/compose use POSTGRES_USER=jobhunt (superuser). Prefer explicit ADMIN_DATABASE_URL
+    # when set; otherwise use DATABASE_URL — do not assume a postgres/postgres role exists.
+    admin = os.environ.get("ADMIN_DATABASE_URL") or os.environ["DATABASE_URL"]
     with psycopg.connect(admin) as conn:
         conn.autocommit = True
         with conn.cursor() as cur:
             cur.execute("DO $$ BEGIN CREATE ROLE authenticated; EXCEPTION WHEN duplicate_object THEN NULL; END $$")
+            cur.execute("GRANT USAGE ON SCHEMA public TO authenticated")
             cur.execute("GRANT SELECT ON inbox_items TO authenticated")
             cur.execute("SET ROLE authenticated")
             cur.execute("SELECT count(*) FROM inbox_items")

@@ -1,0 +1,174 @@
+{
+  "metadata": {
+    "engine": "browserless_http",
+    "timestamp": "2026-10-02T01:59:09.483147+00:00",
+    "keyword": "Data Scientist",
+    "job_count": 8,
+    "post_count": 3
+  },
+  "jobs": [
+    {
+      "job_id": "4468058393",
+      "title": "Data Scientist",
+      "company": "Infosys",
+      "location": "Bengaluru East, Karnataka, India",
+      "url": "https://in.linkedin.com/jobs/view/data-scientist-at-infosys-4468058393",
+      "posted_text": "1 week ago",
+      "workplace_type": "Hybrid / Not Specified",
+      "employment_type": "Employment type Full-time",
+      "about_job": "Primary skills: Python, SQL, experimentation. Design, develop, and maintain ML features and analytics pipelines. Build RESTful endpoints for model serving. Collaborate with product on A/B tests. Minimum 2–5 years hands-on Python for data science.",
+      "description": "Primary skills: Python, SQL, experimentation. Design, develop, and maintain ML features and analytics pipelines.",
+      "applicants": "Over 200 applicants",
+      "application_urls": [
+        "https://in.linkedin.com/jobs/view/data-scientist-at-infosys-4468058393"
+      ]
+    },
+    {
+      "job_id": "4461963315",
+      "title": "Senior Data Scientist",
+      "company": "Wissen Technology",
+      "location": "Bengaluru, Karnataka, India",
+      "url": "https://in.linkedin.com/jobs/view/senior-data-scientist-at-wissen-technology-4461963315",
+      "posted_text": "3 weeks ago",
+      "workplace_type": "Hybrid",
+      "employment_type": "Employment type Full-time",
+      "about_job": "Deliver forecasting and causal inference features. Experience 1-5 years Python, PostgreSQL, FastAPI or Flask for model APIs. Hybrid Bangalore.",
+      "description": "Deliver forecasting and causal inference features. Python, PostgreSQL, FastAPI.",
+      "applicants": "Over 200 applicants",
+      "application_urls": [
+        "https://in.linkedin.com/jobs/view/senior-data-scientist-at-wissen-technology-4461963315"
+      ]
+    },
+    {
+      "job_id": "4444947307",
+      "title": "ML Engineer",
+      "company": "PPFAS Mutual Fund",
+      "location": "Mumbai, Maharashtra, India",
+      "url": "https://in.linkedin.com/jobs/view/ml-engineer-at-ppfas-mutual-fund-4444947307",
+      "posted_text": "2 months ago",
+      "workplace_type": "Hybrid / Not Specified",
+      "employment_type": "Employment type Full-time",
+      "about_job": "Senior ML Engineer / Manager. Django/Flask, Pandas, NumPy, TensorFlow or PyTorch a plus. 4-6 years Python. Location Andheri-Mumbai.",
+      "description": "Senior ML Engineer. Django/Flask, Pandas, NumPy. 4-6 years Python.",
+      "applicants": "",
+      "application_urls": [
+        "https://in.linkedin.com/jobs/view/ml-engineer-at-ppfas-mutual-fund-4444947307"
+      ]
+    },
+    {
+      "job_id": "4463253082",
+      "title": "Applied Scientist",
+      "company": "AiFA Labs",
+      "location": "Hyderabad, Telangana, India",
+      "url": "https://in.linkedin.com/jobs/view/applied-scientist-at-aifa-labs-4463253082",
+      "posted_text": "3 weeks ago",
+      "workplace_type": "On-site",
+      "employment_type": "Employment type Full-time",
+      "about_job": "Applied Scientist with FastAPI and Flask, NumPy and Pandas. 6+ years. On-site Hyderabad. Notice period Immediate to 15 Days.",
+      "description": "Applied Scientist FastAPI Flask NumPy Pandas. 6+ years. Hyderabad on-site.",
+      "applicants": "Be among the first 25 applicants",
+      "application_urls": [
+        "https://in.linkedin.com/jobs/view/applied-scientist-at-aifa-labs-4463253082"
+      ]
+    },
+    {
+      "job_id": "4458865973",
+      "title": "Analytics Engineer",
+      "company": "ASTIKA SOFTWARE TECHNOLOGIES PRIVATE LIMITED",
+      "location": "Hyderabad, Telangana, India",
+      "url": "https://in.linkedin.com/jobs/view/analytics-engineer-at-astika-4458865973",
+      "posted_text": "1 month ago",
+      "workplace_type": "Hybrid / Not Specified",
+      "employment_type": "Employment type Full-time",
+      "about_job": "Analytics Engineer 5–6 years. Python, RESTful APIs, microservices, SQL, AWS, CI/CD. FastAPI or Django REST.",
+      "description": "Analytics Engineer Python REST microservices SQL AWS CI/CD.",
+      "applicants": "Over 200 applicants",
+      "application_urls": [
+        "https://in.linkedin.com/jobs/view/analytics-engineer-at-astika-4458865973"
+      ]
+    },
+    {
+      "job_id": "4471000001",
+      "title": "Data Analyst",
+      "company": "Sample Analytics",
+      "location": "Pune, Maharashtra, India",
+      "url": "https://in.linkedin.com/jobs/view/data-analyst-at-sample-analytics-4471000001",
+      "posted_text": "4 days ago",
+      "workplace_type": "Hybrid",
+      "employment_type": "Employment type Full-time",
+      "about_job": "Data Analyst for India marketplace. SQL, Python, dashboards, experimentation design. 2+ years.",
+      "description": "Data Analyst SQL Python dashboards experimentation. Pune hybrid.",
+      "applicants": "Be among the first 25 applicants",
+      "application_urls": [
+        "https://boards.greenhouse.io/sample-analytics/jobs/4471000001"
+      ]
+    },
+    {
+      "job_id": "4471000002",
+      "title": "MLOps Engineer",
+      "company": "Harbor Metrics",
+      "location": "Remote, India",
+      "url": "https://in.linkedin.com/jobs/view/mlops-engineer-at-harbor-metrics-4471000002",
+      "posted_text": "5 days ago",
+      "workplace_type": "Remote",
+      "employment_type": "Employment type Full-time",
+      "about_job": "MLOps Engineer. Deploy and monitor Python ML services, Docker, CI/CD, feature stores. Remote India.",
+      "description": "MLOps Docker CI/CD Python model serving. Remote India.",
+      "applicants": "Over 100 applicants",
+      "application_urls": [
+        "https://boards.greenhouse.io/harbor/jobs/4471000002"
+      ]
+    },
+    {
+      "job_id": "4471000003",
+      "title": "GenAI Engineer",
+      "company": "Nimbus AI",
+      "location": "Gurugram, Haryana, India",
+      "url": "https://in.linkedin.com/jobs/view/genai-engineer-at-nimbus-ai-4471000003",
+      "posted_text": "2 days ago",
+      "workplace_type": "Hybrid",
+      "employment_type": "Employment type Full-time",
+      "about_job": "GenAI / LLM Engineer. RAG pipelines, evaluation, Python FastAPI. 3+ years backend or ML.",
+      "description": "GenAI LLM RAG evaluation Python FastAPI. Gurugram hybrid.",
+      "applicants": "Be among the first 25 applicants",
+      "application_urls": [
+        "https://in.linkedin.com/jobs/view/genai-engineer-at-nimbus-ai-4471000003"
+      ]
+    }
+  ],
+  "posts": [
+    {
+      "author": "Roxanne Y.",
+      "headline": "Talent / Hiring Post (urn:li:activity:7511594436552753152)",
+      "posted_time": "44m",
+      "author_profile": "https://hk.linkedin.com/in/roxanne-y-55481311a",
+      "content": "HAPPY FRIDAY!! #HIRING multiple Developers, Quant Devs, and Data Scientists across Python. Email your CV to: r.yaneza@gravitasgroup.com #HIRING #PythonQuant",
+      "url": "https://www.linkedin.com/feed/update/urn:li:activity:7511594436552753152/",
+      "contact_email": "r.yaneza@gravitasgroup.com",
+      "email_subject": "Application: Data Scientist Opportunities - (Referencing your LinkedIn Post)",
+      "email_draft": "Hi Roxanne,\n\nI came across your recent LinkedIn post...\n"
+    },
+    {
+      "author": "Priya Nair",
+      "headline": "Talent / Hiring Post (urn:li:activity:7511594436552753999)",
+      "posted_time": "2h",
+      "author_profile": "https://www.linkedin.com/in/priya-nair-example",
+      "content": "We are hiring Data Scientists with strong Python and SQL. Drop your resume — careers@harbor.example #hiring #DataScientist",
+      "url": "https://www.linkedin.com/feed/update/urn:li:activity:7511594436552753999/",
+      "contact_email": "careers@harbor.example",
+      "email_subject": "Application: Data Scientist",
+      "email_draft": "Hi Priya,\n\nDraft stripped on ingest.\n"
+    },
+    {
+      "author": "Arjun Mehta",
+      "headline": "Talent / Hiring Post (urn:li:ugcPost:991)",
+      "posted_time": "1d",
+      "author_profile": "https://www.linkedin.com/in/arjun-mehta-example",
+      "content": "Urgent requirement: ML Engineer / Applied Scientist for GenAI team in Bengaluru. Share CV to talent@nimbus.example. Notice period: Immediate.",
+      "url": "https://www.linkedin.com/feed/update/urn:li:ugcPost:991/",
+      "contact_email": "talent@nimbus.example",
+      "email_subject": "ML Engineer",
+      "email_draft": "Hi Arjun,\n\n..."
+    }
+  ]
+}

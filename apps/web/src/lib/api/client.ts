@@ -49,8 +49,36 @@ export const endpoints = {
   approvals: () => api<{ approvals: Approval[]; pending: Approval[] }>("/approvals"),
   decideApproval: (taskId: string, decision: "approved" | "denied") =>
     api<Record<string, unknown>>(`/approvals/${taskId}/decide`, { method: "POST", body: JSON.stringify({ decision }) }),
-  handoffApply: (inboxId: string) => api<{ apply_urls: string[] }>(`/inbox/${inboxId}/handoff`, { method: "POST" }),
+  handoffApply: (inboxId: string) =>
+    api<{ apply_urls: string[]; application?: ApplicationItem; hint?: string }>(`/inbox/${inboxId}/handoff`, {
+      method: "POST",
+    }),
+  applications: () =>
+    api<{ status: string; items: ApplicationItem[]; by_stage: Record<string, number>; states: string[] }>(
+      "/applications",
+    ),
+  createApplication: (body: { inbox_item_id: string; apply_url?: string; notes?: string; mark_inbox_applied?: boolean }) =>
+    api<{ item: ApplicationItem }>("/applications", { method: "POST", body: JSON.stringify(body) }),
+  patchApplication: (id: string, body: { state: string; notes?: string }) =>
+    api<{ item: ApplicationItem }>(`/applications/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   queueScan: (body: unknown) => api<{ scan_job_id: string; status: string }>("/discovery/scans", { method: "POST", body: JSON.stringify(body) }),
+  demo1Refresh: (body: unknown = {}) =>
+    api<{ status: string; scans: { scan_job_id: string; connector_id: string; status: string }[]; hint: string }>(
+      "/discovery/demo1-refresh",
+      { method: "POST", body: JSON.stringify(body) },
+    ),
+  linkedinMasterIngest: (body: unknown = {}) =>
+    api<{
+      status: string;
+      jobs_upserted: number;
+      posts_upserted: number;
+      inbox_matches_created: number;
+      by_keyword: Record<string, number>;
+      export_dir: string;
+    }>("/discovery/linkedin-master-ingest", { method: "POST", body: JSON.stringify(body) }),
+  matchShared: (body: unknown = {}) =>
+    api<{ status: string; inbox_matches_created: number }>("/discovery/match-shared", { method: "POST", body: JSON.stringify(body) }),
+  sharedJobs: () => api<{ items: { id: string; title: string; company: string; source_connector: string }[] }>("/discovery/shared-jobs"),
   importCandidateCapture: (body: unknown) => api<{ scan_job_id: string; status: string; jobs: number; posts: number }>("/discovery/candidate-imports", { method: "POST", body: JSON.stringify(body) }),
   savedSearches: () => api<{ saved_searches: SavedSearch[] }>("/discovery/saved-searches"),
   connectSource: (connectorId: string, body: unknown) =>
@@ -84,6 +112,7 @@ export type InboxItem = {
   reasons_to_apply: string[];
   risks: string[];
   freshness_hours: number | null;
+  documents?: { id: string; kind: string; status: string; fact_gate_passed: boolean; content?: string }[];
 };
 
 export type ConnectorHealthRow = {
@@ -112,7 +141,7 @@ export type VerifiedFactRow = { id?: string; kind: string; value: string; source
 export type ProfileResponse = {
   profile: Record<string, unknown> | null;
   verified_facts: VerifiedFactRow[];
-  defaults: { cities: string[]; role_aliases: Record<string, string[]> };
+  defaults: { cities: string[]; role_aliases: Record<string, string[]>; beta_ds_ai_titles?: string[] };
   feature_us_market: boolean;
 };
 
@@ -123,6 +152,20 @@ export type Source = {
   policy?: { retention_days?: number; max_requests_per_hour?: number; terms_summary?: string };
   health: { status: string; last_ingest_at?: string; account_status?: string };
   account?: { status: string; consent_at?: string; revoked_at?: string };
+};
+export type ApplicationItem = {
+  id: string;
+  inbox_item_id: string | null;
+  state: string;
+  apply_url?: string | null;
+  notes?: string | null;
+  title?: string | null;
+  company?: string | null;
+  location?: string | null;
+  source_url?: string | null;
+  overall_score?: number | null;
+  created_at?: string;
+  updated_at?: string;
 };
 export type OutreachDraft = { id: string; inbox_item_id: string; channel: string; body: string; status: string };
 export type Agent = { name: string; role: string; status: string };

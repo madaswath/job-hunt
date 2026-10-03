@@ -9,11 +9,6 @@ def _planned(name: str):
     raise HTTPException(status_code=501, detail=f"{name} is planned, not live in Phase 1")
 
 
-@router.get("/applications")
-def applications(user: dict = Depends(current_user)):
-    return {"status": "planned", "items": []}
-
-
 @router.get("/analytics")
 def analytics(user: dict = Depends(current_user)):
     return {"status": "planned", "metrics": {}}
