@@ -69,7 +69,7 @@ Phase 2 live surfaces add: Documents (drafts + approvals), richer Inbox evidence
 | Agent | Role | Status |
 | --- | --- | --- |
 | Vishwakarma | Workflow orchestrator | Live (approval-gated transitions) |
-| Narada | Discovery | Live (fixture ATS, Gmail alerts, browser capture ingest/normalize) |
+| Narada | Discovery | Live (fixture ATS, Gmail alerts, LinkedIn recorded fixtures, browser capture ingest/normalize) |
 | Ganesha | Qualification | Live (hard filters) |
 | Arjuna | Deterministic matching | Live (Match v2 + rematch) |
 | Brihaspati | Job/company analysis | Planned |
@@ -125,7 +125,7 @@ Common contract: connect, ingest, normalize, refresh, revoke, health, policy, ca
 | Gmail alerts | `ingestion_ready` — production gates + UAT sign-off before `production_live` / external users |
 | Browser capture | Live (candidate-initiated capture only) |
 | Naukri, Hirist, Indeed, Instahyre, Cutshort | Catalog until an approved integration exists |
-| LinkedIn | **Demo 1 target** per [locked-intent.md](locked-intent.md) (founder override of prior catalog-only rule); remain honest in UI until executable ingest + tests exist |
+| LinkedIn | **Demo 1 `ingestion_ready`** — recorded LinkedIn-shaped fixtures via `FEATURE_LINKEDIN_INGEST` ([locked-intent.md](locked-intent.md)); unrestricted live scrape remains forbidden; partnership is the long-term path |
 
 LinkedIn hiring posts are modeled separately from `Job` records.
 

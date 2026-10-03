@@ -3,15 +3,15 @@ import { applyTheme } from "../lib/theme";
 import { useState } from "react";
 
 const NAV = [
-  ["/", "Dashboard"],
-  ["/discover", "Discover"],
+  ["/", "Today"],
   ["/inbox", "Review Inbox"],
-  ["/applications", "Applications"],
-  ["/documents", "Documents"],
-  ["/agents", "Agents"],
+  ["/discover", "Discover"],
   ["/sources", "Sources"],
-  ["/analytics", "Analytics"],
   ["/settings", "Profile"],
+  ["/documents", "Documents"],
+  ["/applications", "Applications"],
+  ["/agents", "Agents"],
+  ["/analytics", "Analytics"],
 ] as const;
 
 export function Shell() {

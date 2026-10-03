@@ -27,7 +27,7 @@ Ship a **paid** India-first job-search SaaS for a large audience of switchers. N
 | Source | Role in Demo 1 |
 | --- | --- |
 | Gmail job alerts | Ingest alerts, follow/scrape linked JD pages, normalize, rank into inbox |
-| LinkedIn | Scrape / ingest listings into a **shared indexed job DB** across designations; rank top matches per profile |
+| LinkedIn | Recorded LinkedIn-shaped listings → **shared indexed job DB** (Demo 1 `ingestion_ready`); unrestricted live scrape remains forbidden; partnerships later |
 | Public ATS / career boards | Same shared index + per-user ranking |
 
 Later (post-scale): official partnerships with job portals. Founder accepts LinkedIn scrape risk for Demo 1 / early product; partnerships are the long-term path.

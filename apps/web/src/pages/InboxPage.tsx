@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { endpoints, type InboxItem } from "../lib/api/client";
 import { Empty, ErrorNote, Loading } from "../ui/States";
 
-function inboxActionsForState(state: string): string[] {
-  const actions = ["reject", "save"];
-  if (state === "review_required") actions.push("request_analysis", "prepare_application");
-  if (state === "tailored") actions.push("request_draft_approval");
+function inboxActionsForState(state: string): { id: string; label: string }[] {
+  const actions = [
+    { id: "reject", label: "Reject" },
+    { id: "save", label: "Save" },
+  ];
+  if (state === "review_required") {
+    actions.push({ id: "request_analysis", label: "Request analysis" }, { id: "prepare_application", label: "Prepare application" });
+  }
+  if (state === "tailored") actions.push({ id: "request_draft_approval", label: "Request draft approval" });
   return actions;
 }
 
@@ -16,7 +22,6 @@ type InboxDetail = InboxItem & {
   captured_at?: string;
   duplicate_of?: string | null;
   approval_tasks?: { id: string; kind: string; status: string }[];
-  documents?: { id: string; kind: string; status: string; fact_gate_passed: boolean }[];
   apply_url?: string;
 };
 
@@ -25,19 +30,31 @@ export function InboxPage() {
   const [error, setError] = useState("");
   const [active, setActive] = useState<InboxDetail | null>(null);
   const [msg, setMsg] = useState("");
+  const [draftBusy, setDraftBusy] = useState(false);
   const load = () => endpoints.inbox().then((r) => setItems(r.items as InboxDetail[])).catch((e) => setError(String(e)));
   useEffect(() => {
     load();
   }, []);
   if (error) return <ErrorNote message={error} />;
   if (!items) return <Loading />;
-  if (items.length === 0) return <Empty title="Inbox is empty" body="Save your profile, then queue a public ATS fixture scan from Discover." />;
+  if (items.length === 0) {
+    return (
+      <Empty
+        title="Inbox is empty"
+        body="Save your profile, then run Demo 1 refresh on Discover (Gmail + LinkedIn + ATS)."
+      />
+    );
+  }
+
+  const docs = active?.documents || [];
+  const emails = active?.extracted_emails || [];
+
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
       <ul className="space-y-3">
         {items.map((item) => (
           <li key={item.id}>
-            <button type="button" onClick={() => setActive(item)} className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left dark:border-slate-800 dark:bg-ink-900">
+            <button type="button" onClick={() => { setActive(item); setMsg(""); }} className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left dark:border-slate-800 dark:bg-ink-900">
               <div className="flex justify-between gap-2">
                 <span className="font-medium">{item.title}</span>
                 <span className="text-sm text-amber-700">{item.overall_score}</span>
@@ -70,10 +87,10 @@ export function InboxPage() {
               <p className="font-medium">Pending approvals</p>
               {(active.approval_tasks || []).filter((t) => t.status === "pending").map((t) => (
                 <div key={t.id} className="mt-2 flex flex-wrap gap-2">
-                  <span>{t.kind}</span>
+                  <span>{t.kind.replace(/_/g, " ")}</span>
                   <button type="button" className="rounded border px-2 py-0.5" onClick={async () => {
                     await endpoints.decideApproval(t.id, "approved");
-                    setMsg("Approved — check Documents if prepare was approved.");
+                    setMsg("Approved — check apply pack / Documents if prepare was approved.");
                     load();
                     const refreshed = await endpoints.inboxDetail(active.id);
                     setActive(refreshed.item as InboxDetail);
@@ -89,19 +106,66 @@ export function InboxPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             {inboxActionsForState(active.state).map((action) => (
               <button
-                key={action}
+                key={action.id}
                 type="button"
                 className="rounded-md border px-3 py-1 text-sm dark:border-slate-700"
                 onClick={async () => {
-                  const res = await endpoints.inboxAction(active.id, action);
+                  const res = await endpoints.inboxAction(active.id, action.id);
                   setActive(res.item as InboxDetail);
                   load();
                 }}
               >
-                {action.replace(/_/g, " ")}
+                {action.label}
               </button>
             ))}
           </div>
+
+          {docs.length > 0 ? (
+            <div className="mt-4 rounded-md border border-slate-200 p-3 dark:border-slate-700">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-medium">Apply pack</p>
+                <Link className="text-xs text-amber-700 underline" to="/documents">All documents</Link>
+              </div>
+              <ul className="mt-2 space-y-2 text-sm">
+                {docs.map((d) => (
+                  <li key={d.id}>
+                    <p className="font-medium capitalize">{d.kind.replace(/_/g, " ")} · {d.status} · gate {d.fact_gate_passed ? "pass" : "blocked"}</p>
+                    {d.content ? <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-slate-50 p-2 text-xs dark:bg-ink-800">{d.content}</pre> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {emails.length > 0 ? (
+            <div className="mt-4 rounded-md border border-slate-200 p-3 text-sm dark:border-slate-700">
+              <p className="font-medium">Recruiter email path</p>
+              <p className="mt-1 text-xs text-slate-500">{emails.join(", ")}</p>
+              <button
+                type="button"
+                disabled={draftBusy}
+                className="mt-2 rounded-md border px-3 py-1 text-sm disabled:opacity-50"
+                onClick={async () => {
+                  setDraftBusy(true);
+                  try {
+                    const res = await endpoints.createOutreachDraft({
+                      inbox_item_id: active.id,
+                      channel: "email",
+                      explicit_outreach_request: true,
+                    });
+                    setMsg(`Draft ready (${res.draft.status}). Review body, then you send — we never auto-send.`);
+                  } catch (e) {
+                    setMsg(String(e));
+                  } finally {
+                    setDraftBusy(false);
+                  }
+                }}
+              >
+                Draft recruiter email
+              </button>
+            </div>
+          ) : null}
+
           {active.state === "ready_to_apply" ? (
             <button
               type="button"
@@ -109,7 +173,7 @@ export function InboxPage() {
               onClick={async () => {
                 const h = await endpoints.handoffApply(active.id);
                 if (h.apply_urls[0]) window.open(h.apply_urls[0], "_blank", "noopener,noreferrer");
-                setMsg("Apply URL opened in new tab (audit recorded). You submit manually.");
+                setMsg("Apply URL opened. Materials are above — you submit on the employer site.");
               }}
             >
               Open external apply (handoff)

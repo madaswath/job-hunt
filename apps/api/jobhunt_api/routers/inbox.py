@@ -41,7 +41,7 @@ def _enrich_item(row: dict, user_id: str) -> dict:
         (user_id, item_id),
     )
     docs = db.fetch_all(
-        "SELECT id, kind, status, fact_gate_passed, version FROM tailored_documents WHERE user_id = %s AND inbox_item_id = %s",
+        "SELECT id, kind, status, fact_gate_passed, version, content FROM tailored_documents WHERE user_id = %s AND inbox_item_id = %s",
         (user_id, item_id),
     )
     excerpt = row.get("excerpt") or ""

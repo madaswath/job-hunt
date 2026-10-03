@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { endpoints, type Dashboard } from "../lib/api/client";
 import { Card, ErrorNote, Loading } from "../ui/States";
+import { JourneyGuide } from "../ui/JourneyGuide";
 
 export function DashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
@@ -13,13 +14,25 @@ export function DashboardPage() {
   if (!data) return <Loading />;
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Today</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <h1 className="text-2xl font-semibold">Today</h1>
+        <Link className="rounded-md bg-amber-700 px-3 py-2 text-sm text-white" to="/discover">
+          Refresh matches
+        </Link>
+      </div>
+      <JourneyGuide />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Card title="Recommended jobs" action={<Link className="text-sm text-amber-700" to="/inbox">Inbox</Link>}>
-          {data.recommended.length === 0 ? <p className="text-sm text-slate-500">No strong matches yet. Queue a fixture scan.</p> : (
+          {data.recommended.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              No strong matches yet. Save your profile, then run <Link className="underline" to="/discover">Demo 1 refresh</Link>.
+            </p>
+          ) : (
             <ul className="space-y-2 text-sm">
               {data.recommended.map((j) => (
-                <li key={j.id}><span className="font-medium">{j.title}</span> · {j.company} · {j.overall_score}</li>
+                <li key={j.id}>
+                  <span className="font-medium">{j.title}</span> · {j.company} · {j.overall_score}
+                </li>
               ))}
             </ul>
           )}
@@ -30,7 +43,7 @@ export function DashboardPage() {
             <ul className="text-sm">{data.scan_health.map((s) => <li key={s.id}>{s.status}{s.last_error ? ` — ${s.last_error}` : ""}</li>)}</ul>
           )}
         </Card>
-        <Card title="Applications by stage"><p className="text-sm text-slate-500">Tracker planned for Phase 2.</p></Card>
+        <Card title="Applications by stage"><p className="text-sm text-slate-500">Tracker planned — mark Applied after handoff for now via notes in beta.</p></Card>
         <Card title="Follow-ups"><p className="text-sm text-slate-500">No upcoming follow-ups.</p></Card>
         <Card title="Interview reminders"><p className="text-sm text-slate-500">No interviews recorded.</p></Card>
         <Card title="Connector health">

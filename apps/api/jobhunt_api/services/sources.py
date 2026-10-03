@@ -152,7 +152,7 @@ def queue_ingest(user_id: str, connector_id: str, payload: dict[str, Any]) -> di
     assert_connector_operation(connector_id, "ingest")
     if connector_id == "gmail_alerts" and payload.get("use_gmail_api"):
         production_gates.assert_external_connector("gmail_alerts")
-    if connector_id == "gmail_alerts":
+    if connector_id in {"gmail_alerts", "linkedin"}:
         require_connected(user_id, connector_id)
     assert_ingest_rate(user_id, connector_id)
     account = db.fetch_one(

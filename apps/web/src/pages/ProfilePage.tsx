@@ -9,9 +9,9 @@ export function ProfilePage() {
   const [form, setForm] = useState({
     full_name: "",
     email: "",
-    skills: "python, fastapi, rag, langchain",
-    target_titles: "GenAI Engineer, Backend Engineer",
-    preferred_cities: "Bengaluru, Hyderabad, remote",
+    skills: "python, sql, statistics, rag, pytorch",
+    target_titles: "Data Scientist, GenAI Engineer, Machine Learning Engineer, Applied Scientist",
+    preferred_cities: "Bengaluru, Hyderabad, Pune, remote",
     work_mode: "hybrid",
     min_ctc_inr_annual: "2500000",
     expected_ctc_inr_annual: "3500000",
@@ -19,18 +19,25 @@ export function ProfilePage() {
     employment_types: "full-time",
     company_preference: "either",
     deal_breakers: "",
-    title_aliases: "GenAI Engineer, LLM Engineer",
+    title_aliases: "Data Scientist, ML Engineer, GenAI Engineer, LLM Engineer, AI Engineer",
     banned_companies: "",
     banned_roles: "",
     min_ctc_inr_monthly: "",
-    years_experience: "6",
+    years_experience: "4",
     seniority: "mid",
-    verified_facts: "metric: Built RAG evaluation at current employer\nskill: python\nskill: rag",
+    verified_facts: "skill: python\nskill: sql\nskill: rag\nmetric: Built RAG evaluation at current employer",
   });
   useEffect(() => {
     endpoints.profile().then((r) => {
       setUs(r.feature_us_market);
       const p = r.profile;
+      const betaTitles = r.defaults.beta_ds_ai_titles;
+      if (!p && betaTitles?.length) {
+        setForm((f) => ({
+          ...f,
+          target_titles: betaTitles.slice(0, 6).join(", "),
+        }));
+      }
       if (p) {
         setForm((f) => ({
           ...f,

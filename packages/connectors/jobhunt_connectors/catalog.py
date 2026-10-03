@@ -6,6 +6,7 @@ from jobhunt_connectors.config import env_flag
 from jobhunt_connectors.contract import ConnectorCapabilities, ConnectorPolicy, RawCapture
 from jobhunt_connectors.fixture_ats import PublicAtsFixtureConnector
 from jobhunt_connectors.gmail_alerts import GmailAlertsConnector
+from jobhunt_connectors.linkedin import LinkedInJobsConnector
 
 
 class CatalogConnector:
@@ -56,10 +57,20 @@ CONNECTOR_CATALOG: dict[str, Any] = {
     "naukri": CatalogConnector("naukri", "naukri", "catalog", "Catalog only until an approved integration exists.", []),
     "hirist": CatalogConnector("hirist", "hirist", "catalog", "Catalog only until an approved integration exists.", []),
     "indeed": CatalogConnector("indeed", "indeed", "catalog", "Catalog only until an approved integration exists.", []),
-    "linkedin": CatalogConnector("linkedin", "linkedin", "catalog", "Hiring posts stored separately; catalog until approved.", []),
     "instahyre": CatalogConnector("instahyre", "instahyre", "catalog", "Catalog only until an approved integration exists.", []),
     "cutshort": CatalogConnector("cutshort", "cutshort", "catalog", "Catalog only until an approved integration exists.", []),
 }
+
+if env_flag("FEATURE_LINKEDIN_INGEST", True):
+    CONNECTOR_CATALOG["linkedin"] = LinkedInJobsConnector()
+else:
+    CONNECTOR_CATALOG["linkedin"] = CatalogConnector(
+        "linkedin",
+        "linkedin",
+        "catalog",
+        "Hiring posts stored separately; catalog until Demo 1 ingest flag is enabled.",
+        [],
+    )
 
 if env_flag("FEATURE_GMAIL_ALERTS", True):
     CONNECTOR_CATALOG["gmail_alerts"] = GmailAlertsConnector()

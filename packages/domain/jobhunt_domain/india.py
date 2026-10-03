@@ -36,11 +36,26 @@ ROLE_ALIASES = {
     "ml engineer": {"ml engineer", "machine learning engineer", "applied scientist"},
     "mlops engineer": {"mlops engineer", "ml platform engineer", "platform engineer"},
     "data scientist": {"data scientist", "applied scientist", "ml engineer"},
+    "data analyst": {"data analyst", "analytics engineer", "business analyst"},
+    "analytics engineer": {"analytics engineer", "data analyst", "data engineer"},
     "applied scientist": {"applied scientist", "data scientist", "ml engineer"},
     "backend engineer": {"backend engineer", "software engineer", "platform engineer"},
     "platform engineer": {"platform engineer", "backend engineer", "mlops engineer"},
     "solutions architect": {"solutions architect", "solution architect", "architect"},
 }
+
+# Demo 1 / beta vertical (locked-intent Option C)
+BETA_DS_AI_TITLES = [
+    "Data Scientist",
+    "Data Analyst",
+    "Analytics Engineer",
+    "Machine Learning Engineer",
+    "Applied Scientist",
+    "MLOps Engineer",
+    "GenAI Engineer",
+    "LLM Engineer",
+    "AI Engineer",
+]
 
 EMPLOYMENT_TYPES = ("full-time", "contract", "internship")
 WORK_MODES = ("remote", "hybrid", "onsite")

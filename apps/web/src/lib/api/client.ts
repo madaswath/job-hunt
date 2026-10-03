@@ -51,6 +51,11 @@ export const endpoints = {
     api<Record<string, unknown>>(`/approvals/${taskId}/decide`, { method: "POST", body: JSON.stringify({ decision }) }),
   handoffApply: (inboxId: string) => api<{ apply_urls: string[] }>(`/inbox/${inboxId}/handoff`, { method: "POST" }),
   queueScan: (body: unknown) => api<{ scan_job_id: string; status: string }>("/discovery/scans", { method: "POST", body: JSON.stringify(body) }),
+  demo1Refresh: (body: unknown = {}) =>
+    api<{ status: string; scans: { scan_job_id: string; connector_id: string; status: string }[]; hint: string }>(
+      "/discovery/demo1-refresh",
+      { method: "POST", body: JSON.stringify(body) },
+    ),
   importCandidateCapture: (body: unknown) => api<{ scan_job_id: string; status: string; jobs: number; posts: number }>("/discovery/candidate-imports", { method: "POST", body: JSON.stringify(body) }),
   savedSearches: () => api<{ saved_searches: SavedSearch[] }>("/discovery/saved-searches"),
   connectSource: (connectorId: string, body: unknown) =>
@@ -84,6 +89,7 @@ export type InboxItem = {
   reasons_to_apply: string[];
   risks: string[];
   freshness_hours: number | null;
+  documents?: { id: string; kind: string; status: string; fact_gate_passed: boolean; content?: string }[];
 };
 
 export type ConnectorHealthRow = {
@@ -112,7 +118,7 @@ export type VerifiedFactRow = { id?: string; kind: string; value: string; source
 export type ProfileResponse = {
   profile: Record<string, unknown> | null;
   verified_facts: VerifiedFactRow[];
-  defaults: { cities: string[]; role_aliases: Record<string, string[]> };
+  defaults: { cities: string[]; role_aliases: Record<string, string[]>; beta_ds_ai_titles?: string[] };
   feature_us_market: boolean;
 };
 

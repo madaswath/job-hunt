@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     feature_document_drafts: bool = True
     feature_gmail_alerts: bool = True
     feature_browser_capture: bool = True
+    feature_linkedin_ingest: bool = True
+    feature_linkedin_scrape: bool = False
     supabase_url: str = ""
     supabase_service_role_key: str = ""
     supabase_storage_bucket: str = "candidate-artifacts"

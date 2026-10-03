@@ -43,8 +43,10 @@ def test_canonical_contracts_require_identity_fields():
 
 
 def test_source_matrix_blocks_unrestricted_scraping():
-    assert capability_for("linkedin").capability_label == "partner_required"
+    assert capability_for("linkedin").capability_label == "beta"
+    assert capability_for("linkedin").implementation_status == "ingestion_ready"
     assert capability_for("public_ats_fixture").capability_label == "live"
+    assert_acquisition_allowed("linkedin", "recorded_scrape_fixture")
     with pytest.raises(PermissionError):
         assert_acquisition_allowed("linkedin", "unrestricted_scrape")
     with pytest.raises(PermissionError):
