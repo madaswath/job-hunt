@@ -124,7 +124,8 @@ Common contract: connect, ingest, normalize, refresh, revoke, health, policy, ca
 | Public ATS fixtures / public career boards | Live in Phase 1 |
 | Gmail alerts | `ingestion_ready` — production gates + UAT sign-off before `production_live` / external users |
 | Browser capture | Live (candidate-initiated capture only) |
-| Naukri, Hirist, Indeed, LinkedIn, Instahyre, Cutshort | Catalog until an approved integration exists |
+| Naukri, Hirist, Indeed, Instahyre, Cutshort | Catalog until an approved integration exists |
+| LinkedIn | **Demo 1 target** per [locked-intent.md](locked-intent.md) (founder override of prior catalog-only rule); remain honest in UI until executable ingest + tests exist |
 
 LinkedIn hiring posts are modeled separately from `Job` records.
 
