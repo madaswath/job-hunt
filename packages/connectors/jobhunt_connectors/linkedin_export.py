@@ -26,8 +26,10 @@ from typing import Any
 
 JOB_FILE_NAMES = (
     "jobs.json",
+    "results.json",
     "jobs.clean.json",
     "jobs.clean.csv",
+    "jobs_clean.csv",
     "jobs.csv",
     "linkedin_jobs.json",
     "linkedin_jobs.csv",
@@ -37,6 +39,7 @@ POST_FILE_NAMES = (
     "posts.clean.json",
     "posts.clean.csv",
     "posts.csv",
+    "recruiter_posts_drafts.csv",
     "feed_posts.json",
     "feed_posts.csv",
     "linkedin_posts.json",
@@ -44,42 +47,99 @@ POST_FILE_NAMES = (
 )
 
 _JOB_ALIASES = {
-    "job_id": ("job_id", "id", "linkedin_job_id", "jobid", "external_id"),
-    "title": ("title", "job_title", "role", "position"),
-    "company": ("company", "company_name", "employer"),
-    "location": ("location", "job_location", "city"),
-    "url": ("url", "job_url", "link", "source_url", "canonical_url"),
-    "description": ("description", "about_job", "job_description", "jd", "full_description"),
-    "posted_at": ("posted_at", "date_posted", "posted", "posted_date", "posted_text", "listed_at"),
-    "workplace_type": ("workplace_type", "work_mode", "remote_type", "work_type"),
-    "employment_type": ("employment_type", "job_type", "employment"),
-    "seniority": ("seniority", "level", "experience_level"),
+    "job_id": ("job_id", "id", "linkedin_job_id", "jobid", "external_id", "Job ID"),
+    "title": ("title", "job_title", "role", "position", "Job Title"),
+    "company": ("company", "company_name", "employer", "Company"),
+    "location": ("location", "job_location", "city", "Location"),
+    "url": ("url", "job_url", "link", "source_url", "canonical_url", "Job URL"),
+    "description": (
+        "description",
+        "about_job",
+        "job_description",
+        "jd",
+        "full_description",
+        "About the Job",
+    ),
+    "posted_at": (
+        "posted_at",
+        "date_posted",
+        "posted",
+        "posted_date",
+        "posted_text",
+        "listed_at",
+        "Posted Date",
+    ),
+    "workplace_type": ("workplace_type", "work_mode", "remote_type", "work_type", "Workplace Type"),
+    "employment_type": ("employment_type", "job_type", "employment", "Employment Type"),
+    "seniority": ("seniority", "level", "experience_level", "seniority_level"),
     "skills": ("skills", "skillset", "required_skills"),
-    "emails": ("emails", "extracted_emails", "recruiter_email", "email"),
-    "apply_urls": ("application_urls", "apply_urls", "apply_url"),
+    "emails": ("emails", "extracted_emails", "recruiter_email", "email", "Contact Email"),
+    "apply_urls": ("application_urls", "apply_urls", "apply_url", "Application URLs"),
     "keyword": ("keyword", "search_keyword", "query", "search_query", "role_keyword"),
+    "applicants": ("applicants", "Applicants"),
 }
 
 _POST_ALIASES = {
     "post_id": ("post_id", "id", "urn", "activity_id", "external_id"),
-    "author": ("author", "author_name", "poster", "author_profile"),
-    "content": ("content", "text", "post_text", "body", "description"),
-    "title": ("title", "headline"),
+    "author": ("author", "author_name", "poster", "author_profile", "Recruiter / Author"),
+    "content": ("content", "text", "post_text", "body", "description", "Full Post Content"),
+    "title": ("title", "headline", "Headline"),
     "company": ("company", "company_name"),
     "location": ("location", "author_location"),
-    "url": ("url", "post_url", "link", "source_url"),
-    "emails": ("emails", "extracted_emails", "email"),
+    "url": ("url", "post_url", "link", "source_url", "Post URL"),
+    "emails": ("emails", "extracted_emails", "email", "contact_email", "Contact Email"),
     "apply_urls": ("apply_urls", "application_urls"),
-    "posted_at": ("posted_at", "posted", "date_posted", "created_at"),
+    "posted_at": ("posted_at", "posted", "date_posted", "created_at", "posted_time", "Posted Time"),
     "keyword": ("keyword", "search_keyword", "query"),
+    "author_profile": ("author_profile", "Profile URL", "profile_url"),
 }
+
+# Never ingest scraper-generated outreach copy into matching / facts.
+_STRIP_KEYS = ("email_draft", "email_subject", "drafted email body", "drafted email subject")
+
+
+def _strip_generated(row: dict[str, Any]) -> dict[str, Any]:
+    out = {}
+    for key, value in row.items():
+        lowered = str(key).strip().lower()
+        if any(part in lowered for part in _STRIP_KEYS):
+            continue
+        out[key] = value
+    return out
+
+
+def _normalize_employment(value: Any) -> str | None:
+    if value is None or value == "":
+        return None
+    text = str(value)
+    text = re.sub(r"(?i)^employment\s*type\s*", "", text).strip()
+    lowered = text.casefold()
+    for token in ("full-time", "part-time", "contract", "internship", "temporary"):
+        if token in lowered:
+            return token
+    return text
+
+
+def _normalize_workplace(value: Any) -> str | None:
+    if value is None or value == "":
+        return None
+    text = str(value)
+    lowered = text.casefold()
+    if "remote" in lowered:
+        return "remote"
+    if "hybrid" in lowered:
+        return "hybrid"
+    if "on-site" in lowered or "onsite" in lowered or "on site" in lowered:
+        return "onsite"
+    return text
 
 
 def _pick(row: dict[str, Any], aliases: tuple[str, ...]) -> Any:
     lower = {str(k).strip().lower(): v for k, v in row.items()}
     for name in aliases:
-        if name in lower and lower[name] not in (None, ""):
-            return lower[name]
+        key = str(name).strip().lower()
+        if key in lower and lower[key] not in (None, ""):
+            return lower[key]
     return None
 
 
@@ -126,45 +186,56 @@ def _parse_posted_at(value: Any) -> str | None:
 
 
 def normalize_job_row(row: dict[str, Any], *, default_keyword: str | None = None) -> dict[str, Any]:
+    row = _strip_generated(row)
     skills = _as_list(_pick(row, _JOB_ALIASES["skills"]))
     emails = _as_list(_pick(row, _JOB_ALIASES["emails"]))
     apply_urls = _as_list(_pick(row, _JOB_ALIASES["apply_urls"]))
     url = _pick(row, _JOB_ALIASES["url"])
-    if url and url not in apply_urls:
+    if url and str(url) not in apply_urls:
         apply_urls = [str(url), *apply_urls]
     keyword = _pick(row, _JOB_ALIASES["keyword"]) or default_keyword
+    about = _pick(row, _JOB_ALIASES["description"]) or ""
     return {
         "job_id": str(_pick(row, _JOB_ALIASES["job_id"]) or "") or None,
         "title": _pick(row, _JOB_ALIASES["title"]),
         "company": _pick(row, _JOB_ALIASES["company"]),
         "location": _pick(row, _JOB_ALIASES["location"]),
         "url": url,
-        "description": _pick(row, _JOB_ALIASES["description"]) or "",
-        "about_job": _pick(row, _JOB_ALIASES["description"]) or "",
+        "description": about,
+        "about_job": about,
         "posted_at": _parse_posted_at(_pick(row, _JOB_ALIASES["posted_at"])),
-        "workplace_type": _pick(row, _JOB_ALIASES["workplace_type"]),
-        "employment_type": _pick(row, _JOB_ALIASES["employment_type"]),
+        "workplace_type": _normalize_workplace(_pick(row, _JOB_ALIASES["workplace_type"])),
+        "employment_type": _normalize_employment(_pick(row, _JOB_ALIASES["employment_type"])),
         "seniority": _pick(row, _JOB_ALIASES["seniority"]),
         "skills": skills,
         "emails": emails,
         "application_urls": apply_urls,
         "keyword": keyword,
+        "applicants": _pick(row, _JOB_ALIASES["applicants"]),
     }
 
 
 def normalize_post_row(row: dict[str, Any], *, default_keyword: str | None = None) -> dict[str, Any]:
+    row = _strip_generated(row)
+    emails = _as_list(_pick(row, _POST_ALIASES["emails"]))
+    # Pull emails from content if Contact Email missing
+    content = str(_pick(row, _POST_ALIASES["content"]) or "")
+    if not emails:
+        found = re.findall(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", content)
+        emails = found[:3]
     return {
         "post_id": str(_pick(row, _POST_ALIASES["post_id"]) or "") or None,
         "author": _pick(row, _POST_ALIASES["author"]),
-        "content": _pick(row, _POST_ALIASES["content"]) or "",
+        "content": content,
         "title": _pick(row, _POST_ALIASES["title"]),
         "company": _pick(row, _POST_ALIASES["company"]),
         "location": _pick(row, _POST_ALIASES["location"]),
         "url": _pick(row, _POST_ALIASES["url"]),
-        "emails": _as_list(_pick(row, _POST_ALIASES["emails"])),
+        "emails": emails,
         "apply_urls": _as_list(_pick(row, _POST_ALIASES["apply_urls"])),
         "posted_at": _parse_posted_at(_pick(row, _POST_ALIASES["posted_at"])),
         "keyword": _pick(row, _POST_ALIASES["keyword"]) or default_keyword,
+        "author_profile": _pick(row, _POST_ALIASES["author_profile"]),
     }
 
 

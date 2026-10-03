@@ -72,9 +72,11 @@ export function DiscoverPage() {
 
       <Card title="LinkedIn scraper → master index">
         <p className="mb-3 text-sm text-slate-500">
-          Drop your scraper JSON / clean CSV under <code className="text-xs">data/linkedin-exports/&lt;role&gt;/</code>
-          (see README there). Ingest keeps the latest <strong>100 jobs per keyword</strong> and <strong>10–15 feed posts</strong>
-          matched to your skills, stores them in the shared master DB, then ranks into Inbox.
+          Run <code className="text-xs">scripts/linkedin_browserless_scraper.py</code> or the batch runner, then ingest here.
+          Expects <code className="text-xs">results.json</code> / <code className="text-xs">jobs_clean.csv</code> /
+          <code className="text-xs">recruiter_posts_drafts.csv</code> under <code className="text-xs">data/linkedin-exports/&lt;role&gt;/</code>.
+          Keeps the latest <strong>100 jobs per keyword</strong> and <strong>10–15 hiring posts</strong>, stores them in the shared master DB,
+          strips scraper email drafts, then ranks into Inbox.
         </p>
         <div className="flex flex-wrap gap-2">
           <button

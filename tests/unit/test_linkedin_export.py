@@ -10,6 +10,26 @@ from jobhunt_connectors.catalog import get_connector
 from jobhunt_policy.rules import assert_connector_operation
 
 
+def test_browserless_results_json_and_clean_csv_aliases():
+    root = Path(__file__).resolve().parents[1] / "fixtures" / "linkedin"
+    bundle = load_export_path(root / "results_sample.json")
+    assert bundle["metadata"]["keyword"] == "Python Developer"
+    assert bundle["jobs"][0]["job_id"] == "4468058393"
+    assert bundle["jobs"][0]["employment_type"] == "full-time"
+    assert bundle["jobs"][0]["workplace_type"] == "hybrid"
+    assert bundle["posts"][0]["emails"] == ["r.yaneza@gravitasgroup.com"]
+    assert "email_draft" not in bundle["posts"][0]
+
+    csv_jobs = load_export_path(root / "jobs_clean.csv")
+    assert csv_jobs["jobs"][0]["title"] == "Python Developer"
+    assert csv_jobs["jobs"][0]["employment_type"] == "full-time"
+
+    csv_posts = load_export_path(root / "recruiter_posts_drafts.csv")
+    assert csv_posts["posts"][0]["author"] == "Roxanne Y."
+    assert csv_posts["posts"][0]["emails"] == ["r.yaneza@gravitasgroup.com"]
+    assert "email_draft" not in str(csv_posts["posts"][0])
+
+
 def test_linkedin_export_json_and_csv_caps():
     root = Path(__file__).resolve().parents[2] / "data" / "linkedin-exports"
     bundles = load_export_tree(root)
