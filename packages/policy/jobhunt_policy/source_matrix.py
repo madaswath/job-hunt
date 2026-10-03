@@ -115,7 +115,7 @@ SOURCE_CAPABILITY_MATRIX: dict[str, SourceCapability] = {
         ],
         capability_label="beta",
         notes=(
-            "Demo 1: recorded LinkedIn-shaped fixtures (FEATURE_LINKEDIN_INGEST). "
+            "Demo 1: scraper JSON/CSV export drops + fixtures into shared_jobs (FEATURE_LINKEDIN_INGEST). "
             "Unrestricted live scrape remains forbidden; partnership is the long-term path."
         ),
     ),

@@ -79,9 +79,9 @@ def _ingest_one(user_id: str, connector, raw: RawCapture, profile: CandidateProf
 def _ingest_one_tx(user_id: str, connector, raw: RawCapture, profile: CandidateProfile) -> bool:
     normalized = connector.normalize(raw)
     try:
-        upsert_shared_job(raw, normalized)
+        upsert_shared_job(raw, normalized, search_keyword=(raw.raw or {}).get("keyword") if isinstance(raw.raw, dict) else None, posted_at=raw.posted_at)
     except Exception:
-        # Shared index is additive; per-user ingest must not fail if migration 006 is absent in older DBs.
+        # Shared index is additive; per-user ingest must not fail if migration 006/007 is absent in older DBs.
         pass
     existing = db.fetch_one(
         """
