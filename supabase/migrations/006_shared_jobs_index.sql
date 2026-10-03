@@ -57,17 +57,18 @@ CREATE INDEX IF NOT EXISTS idx_autopilot_next ON autopilot_schedules (enabled, n
 ALTER TABLE shared_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE autopilot_schedules ENABLE ROW LEVEL SECURITY;
 
--- Service-role only (same pattern as other tables): deny anon/authenticated direct access
+-- Deny browser/direct roles; API/worker use service role (bypasses RLS) + user_id filters.
+-- Use PUBLIC (not anon/authenticated) so plain Postgres CI/compose works without Supabase roles.
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies WHERE tablename = 'shared_jobs' AND policyname = 'shared_jobs_deny_all'
   ) THEN
-    CREATE POLICY shared_jobs_deny_all ON shared_jobs FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
+    CREATE POLICY shared_jobs_deny_all ON shared_jobs FOR ALL TO PUBLIC USING (false) WITH CHECK (false);
   END IF;
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies WHERE tablename = 'autopilot_schedules' AND policyname = 'autopilot_deny_all'
   ) THEN
-    CREATE POLICY autopilot_deny_all ON autopilot_schedules FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
+    CREATE POLICY autopilot_deny_all ON autopilot_schedules FOR ALL TO PUBLIC USING (false) WITH CHECK (false);
   END IF;
 END $$;

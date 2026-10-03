@@ -34,6 +34,6 @@ BEGIN
     WHERE tablename = 'linkedin_master_ingest_runs' AND policyname = 'linkedin_master_runs_deny_all'
   ) THEN
     CREATE POLICY linkedin_master_runs_deny_all ON linkedin_master_ingest_runs
-      FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
+      FOR ALL TO PUBLIC USING (false) WITH CHECK (false);
   END IF;
 END $$;
